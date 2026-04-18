@@ -5,107 +5,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema de Gestión de Activos - PALDACA{% endblock %}</title>
-    
-    <!-- Bootstrap 5 CSS -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- Core CSS -->
     <link rel="stylesheet" href="{% static 'core/css/core.css' %}">
-    
+
     {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-paldaca">
-        <div class="container-fluid">
-            <div class="d-flex align-items-center">
-                <a href="{% url 'core:home' %}" style="text-decoration: none;">
-                    <img src="{% static 'core/img/logo blanco.png' %}" alt="Consorcio Paldaca" style="max-height: 35px;">
-                </a>
-            </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+<body class="app-layout {% block body_extra_class %}{% endblock %}">
+    <aside id="sidebar" class="app-sidebar" aria-label="Navegación principal" aria-expanded="true">
+        <div class="app-sidebar-brand">
+            <a href="{% url 'core:home' %}" class="app-sidebar-brand-link">
+                <img src="{% static 'core/img/logo blanco.png' %}" alt="Consorcio Paldaca" class="app-sidebar-logo" width="140" height="40">
+            </a>
+        </div>
+
+        <nav class="sidebar-menu app-sidebar-nav" aria-label="Secciones">
+            <a href="{% url 'core:home' %}"
+               class="app-sidebar-link{% if request.resolver_match and request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'home' %} is-active{% endif %}">
+                <i class="bi bi-house-door app-sidebar-icon" aria-hidden="true"></i>
+                <span class="app-sidebar-label">Inicio</span>
+            </a>
+            <a href="{% url 'activos:activo-list' %}"
+               class="app-sidebar-link{% if request.resolver_match and request.resolver_match.namespace == 'activos' %} is-active{% endif %}">
+                <img src="{% static 'core/img/Iconos/activos.svg' %}" alt="" class="app-sidebar-icon-img" width="22" height="22">
+                <span class="app-sidebar-label">Activos</span>
+            </a>
+            <a href="{% url 'usuarios:usuario-search' %}"
+               class="app-sidebar-link{% if request.resolver_match and request.resolver_match.namespace == 'usuarios' %} is-active{% endif %}">
+                <i class="bi bi-people app-sidebar-icon" aria-hidden="true"></i>
+                <span class="app-sidebar-label">Usuarios</span>
+            </a>
+            <a href="{% url 'mantenimientos:mantenimiento-list' %}"
+               class="app-sidebar-link{% if request.resolver_match and request.resolver_match.namespace == 'mantenimientos' %} is-active{% endif %}">
+                <i class="bi bi-wrench-adjustable app-sidebar-icon" aria-hidden="true"></i>
+                <span class="app-sidebar-label">Mantenimiento</span>
+            </a>
+        </nav>
+
+        <div class="app-sidebar-footer">
+            <button type="button" id="sidebarArrowUp" class="app-sidebar-scroll-arrow app-sidebar-scroll-arrow--up" aria-label="Subir en el menú" style="display: none;">
+                <i class="bi bi-chevron-up"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto ms-3">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:home' %}">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'activos:activo-list' %}">Activos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'usuarios:usuario-search' %}">Usuarios</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'mantenimientos:mantenimiento-list' %}">Mantenimiento</a>
-                    </li>
-                </ul>
-                <div class="ms-auto">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'core:logout' %}" class="btnlogout" style="text-decoration: none;">
-                            <div class="sign">
-                                <svg viewBox="0 0 512 512">
-                                    <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
-                                </svg>
-                            </div>
-                            <div class="text">Logout</div>
-                        </a>            
-                    {% endif %}
-                </div>
-            </div>
+            <button type="button" id="sidebarArrowDown" class="app-sidebar-scroll-arrow app-sidebar-scroll-arrow--down" aria-label="Bajar en el menú" style="display: none;">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+            <button type="button" id="sidebarCollapseBtn" class="app-sidebar-collapse-btn d-none d-lg-flex" aria-label="Colapsar barra lateral" title="Colapsar menú">
+                <i class="bi bi-chevron-double-left" aria-hidden="true"></i>
+            </button>
         </div>
-    </nav>
+    </aside>
 
-    <!-- Header con logo -->
-    <div class="headercontainer">
-        <img src="{% static 'core/img/paldaca_logo-header-2.png' %}" alt="Logo PALDACA" class="logoheader">
+    <div id="sidebarBackdrop" class="app-sidebar-backdrop" aria-hidden="true"></div>
+
+    <div class="app-content-wrap">
+        <header class="app-topbar">
+            <button type="button" id="menu" class="app-menu-btn d-lg-none" aria-expanded="false" aria-label="Abrir menú de navegación">
+                <span class="app-menu-btn-bars" aria-hidden="true"></span>
+            </button>
+            <div class="app-topbar-brand d-none d-md-flex align-items-center">
+                <img src="{% static 'core/img/paldaca_logo-header-2.png' %}" alt="" class="app-topbar-brand-img">
+            </div>
+            <div class="app-topbar-spacer"></div>
+            {% if user.is_authenticated %}
+            <a href="{% url 'core:logout' %}" class="btnlogout" style="text-decoration: none;">
+                <div class="sign">
+                    <svg viewBox="0 0 512 512" aria-hidden="true">
+                        <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
+                    </svg>
+                </div>
+                <div class="text">Logout</div>
+            </a>
+            {% endif %}
+        </header>
+
+        {% if messages %}
+        <div class="container-fluid px-3 pt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <main class="main-content flex-grow-1">
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="app-footer-inner">
+                <div class="app-footer-brand">
+                    <img src="{% static 'core/img/logo blanco.png' %}" alt="Consorcio Paldaca" class="app-footer-logo" width="100" height="28">
+                    <span class="app-footer-copy">&copy; {% now "Y" %} Consorcio PALDACA</span>
+                </div>
+                <nav class="app-footer-nav" aria-label="Enlaces pie de página">
+                    <a href="{% url 'core:home' %}">Inicio</a>
+                    <span class="app-footer-dot" aria-hidden="true"></span>
+                    <a href="{% url 'activos:activo-list' %}">Activos</a>
+                    <span class="app-footer-dot" aria-hidden="true"></span>
+                    <a href="{% url 'usuarios:usuario-search' %}">Usuarios</a>
+                    <span class="app-footer-dot" aria-hidden="true"></span>
+                    <a href="{% url 'mantenimientos:mantenimiento-list' %}">Mantenimiento</a>
+                </nav>
+            </div>
+        </footer>
     </div>
 
-    <!-- Messages -->
-    {% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container-fluid">
-            {% block content %}{% endblock %}
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer mt-auto py-3">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <img src="{% static 'core/img/logo blanco.png' %}" alt="Consorcio Paldaca" style="max-height: 35px;">
-                </div>
-            </div>
-            <div class="row mt-2">
-                <div class="col text-center">
-                    <a href="{% url 'core:home' %}" class="mx-2">Inicio</a>
-                    <a href="{% url 'activos:activo-list' %}" class="mx-2">Activos</a>
-                    <a href="{% url 'usuarios:usuario-search' %}" class="mx-2">Usuarios</a>
-                    <a href="{% url 'mantenimientos:mantenimiento-list' %}" class="mx-2">Mantenimiento</a>
-                    <a href="#" class="mx-2">Contact</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'core/js/base.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
