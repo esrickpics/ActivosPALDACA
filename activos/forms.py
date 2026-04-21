@@ -19,16 +19,25 @@ class SubCategoriaForm(forms.ModelForm):
     """Formulario para SubCategoría"""
     class Meta:
         model = SubCategoria
-        fields = ['nombre', 'categoria']
+        fields = ['nombre', 'prefijo', 'categoria']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Nombre de la subcategoría'
             }),
+            'prefijo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: D',
+                'maxlength': 5
+            }),
             'categoria': forms.Select(attrs={
                 'class': 'form-select'
             })
         }
+
+    def clean_prefijo(self):
+        prefijo = (self.cleaned_data.get('prefijo') or '').strip().upper()
+        return prefijo
 
 
 class UbicacionForm(forms.ModelForm):
@@ -50,7 +59,7 @@ class ActivoForm(forms.ModelForm):
         model = Activo
         fields = [
             'subcategoria', 'marca', 'modelo', 'numero_serial',
-            'codigo_inventario', 'usuario_asignado', 'ubicacion',
+            'usuario_asignado', 'ubicacion',
             'observaciones', 'estado'
         ]
         widgets = {
@@ -69,10 +78,6 @@ class ActivoForm(forms.ModelForm):
             'numero_serial': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Número de serie (opcional)'
-            }),
-            'codigo_inventario': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Código único de inventario'
             }),
             'usuario_asignado': forms.Select(attrs={
                 'class': 'form-select'

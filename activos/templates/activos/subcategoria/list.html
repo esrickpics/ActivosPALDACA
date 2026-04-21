@@ -10,9 +10,14 @@
                 <img src="{% static 'core/img/Iconos/nueva-categoria.svg' %}" alt="Icono" style="width: 32px; height: 32px; margin-right: 10px;">
                 Subcategorías
             </h2>
-            <a href="{% url 'activos:subcategoria-create' %}" class="btn btn-primary-custom">
-                <i class="bi bi-plus-circle"></i> Nueva Subcategoría
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'activos:categoria-list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-folder"></i> Ver Categorías
+                </a>
+                <a href="{% url 'activos:subcategoria-create' %}" class="btn btn-primary-custom">
+                    <i class="bi bi-plus-circle"></i> Nueva Subcategoría
+                </a>
+            </div>
         </div>
         <hr class="linea" style="border-color: #32407b;">
 

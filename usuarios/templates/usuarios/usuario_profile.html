@@ -62,6 +62,44 @@
         </div>
     </div>
 
+    <!-- Planilla de asignación -->
+    <div class="card mb-4 planilla-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-file-earmark-pdf me-1"></i> Planilla de Asignación</h5>
+            {% if usuario.pdf_asignacion %}
+            <span class="planilla-status">
+                <i class="bi bi-check-circle-fill"></i> Cargada
+            </span>
+            {% else %}
+            <span class="planilla-status planilla-status-empty">
+                <i class="bi bi-exclamation-circle"></i> Sin planilla
+            </span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+                {% csrf_token %}
+                <div class="col-md-7">
+                    <label for="pdf_asignacion" class="form-label">Seleccionar planilla (PDF)</label>
+                    <input type="file" class="form-control" id="pdf_asignacion" name="pdf_asignacion" accept="application/pdf,.pdf" required>
+                    <small class="text-muted">Solo formato PDF.</small>
+                </div>
+                <div class="col-md-5">
+                    <div class="planilla-actions">
+                        {% if usuario.pdf_asignacion %}
+                        <a href="{{ usuario.pdf_asignacion.url }}" target="_blank" class="btn btn-sm planilla-btn planilla-btn-view">
+                            <i class="bi bi-eye"></i> Ver planilla
+                        </a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-sm planilla-btn planilla-btn-upload">
+                            <i class="bi bi-upload"></i> Cargar planilla
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Activos asignados -->
     <div class="card">
         <div class="card-header">
@@ -163,6 +201,62 @@
     background-color: #f8f9fa;
     border-top: none;
 }
+.planilla-card .card-body {
+    background: #f9fbff;
+}
+.planilla-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: rgba(46, 160, 67, 0.15);
+    color: #1f7a33;
+    border: 1px solid rgba(46, 160, 67, 0.25);
+    padding: 0.22rem 0.55rem;
+    border-radius: 999px;
+}
+.planilla-status-empty {
+    background: rgba(255, 193, 7, 0.18);
+    color: #8a6d00;
+    border-color: rgba(255, 193, 7, 0.35);
+}
+.planilla-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.45rem;
+}
+.planilla-btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.34rem 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    justify-content: center;
+    min-width: 140px;
+}
+.planilla-btn-view {
+    background: #eef2ff;
+    border: 1px solid #ccd8ff;
+    color: #2e3f83;
+}
+.planilla-btn-view:hover {
+    background: #dfe7ff;
+    border-color: #b8c8ff;
+    color: #1f2f6f;
+}
+.planilla-btn-upload {
+    background: linear-gradient(135deg, #32407b 0%, #282c89 100%);
+    border: 1px solid #282c89;
+    color: #fff;
+}
+.planilla-btn-upload:hover {
+    background: linear-gradient(135deg, #2a3566 0%, #242679 100%);
+    border-color: #242679;
+    color: #fff;
+}
 @media (max-width: 767.98px) {
     .usuario-profile-page {
         padding: 0.9rem 0.4rem !important;
@@ -208,6 +302,18 @@
         text-transform: uppercase;
         letter-spacing: 0.03em;
         margin-bottom: 0.15rem;
+    }
+    .planilla-status {
+        font-size: 0.72rem;
+    }
+    .planilla-actions {
+        justify-content: stretch;
+        margin-top: 0.2rem;
+    }
+    .planilla-btn {
+        width: 100%;
+        min-width: unset;
+        padding: 0.42rem 0.65rem;
     }
 }
 </style>

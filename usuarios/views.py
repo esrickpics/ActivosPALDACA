@@ -56,6 +56,24 @@ class UsuarioProfileView(DetailView):
         )
         return context
 
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        archivo_pdf = request.FILES.get('pdf_asignacion')
+
+        if not archivo_pdf:
+            messages.error(request, 'Debe seleccionar un archivo PDF.')
+            return redirect('usuarios:usuario-profile', pk=self.object.pk)
+
+        nombre_archivo = archivo_pdf.name.lower()
+        if not nombre_archivo.endswith('.pdf'):
+            messages.error(request, 'Solo se permiten archivos en formato PDF.')
+            return redirect('usuarios:usuario-profile', pk=self.object.pk)
+
+        self.object.pdf_asignacion = archivo_pdf
+        self.object.save()
+        messages.success(request, 'PDF de asignación cargado correctamente.')
+        return redirect('usuarios:usuario-profile', pk=self.object.pk)
+
 
 class UsuarioCreateView(CreateView):
     """Vista para crear usuario"""

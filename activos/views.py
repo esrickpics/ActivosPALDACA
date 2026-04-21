@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
@@ -250,6 +250,9 @@ class ActivoCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, 'Activo creado exitosamente.')
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('activos:activo-detail', kwargs={'pk': self.object.pk})
 
 
 class ActivoUpdateView(LoginRequiredMixin, UpdateView):

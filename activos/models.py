@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
+import re
 
 
 class Categoria(models.Model):
@@ -19,6 +20,7 @@ class Categoria(models.Model):
 class SubCategoria(models.Model):
     """Subcategoría de activos"""
     nombre = models.CharField(max_length=100)
+    prefijo = models.CharField(max_length=5, unique=True)
     categoria = models.ForeignKey(
         Categoria, 
         on_delete=models.PROTECT,
@@ -33,6 +35,13 @@ class SubCategoria(models.Model):
     
     def __str__(self):
         return f"{self.categoria.nombre} - {self.nombre}"
+
+    def clean(self):
+        super().clean()
+        if self.prefijo:
+            self.prefijo = self.prefijo.strip().upper()
+            if not re.match(r'^[A-Z0-9]{1,5}$', self.prefijo):
+                raise ValidationError({'prefijo': 'El prefijo solo puede contener letras y números (máx. 5).'})
 
 
 class Ubicacion(models.Model):
@@ -114,6 +123,28 @@ class Activo(models.Model):
         super().clean()
         if self.codigo_inventario:
             self.codigo_inventario = self.codigo_inventario.upper().strip()
+
+    def _generar_codigo_inventario(self):
+        prefijo = self.subcategoria.prefijo.strip().upper()
+        base = f"PAL-{prefijo}-"
+        codigos = Activo.objects.filter(
+            codigo_inventario__startswith=base
+        ).values_list('codigo_inventario', flat=True)
+        ultimo = 0
+        for codigo in codigos:
+            try:
+                numero = int(codigo.split('-')[-1])
+            except (ValueError, IndexError):
+                continue
+            if numero > ultimo:
+                ultimo = numero
+        return f"{base}{ultimo + 1:03d}"
+
+    def save(self, *args, **kwargs):
+        if not self.codigo_inventario:
+            self.codigo_inventario = self._generar_codigo_inventario()
+        self.codigo_inventario = self.codigo_inventario.upper().strip()
+        super().save(*args, **kwargs)
 
 
 class HistorialMovimiento(models.Model):

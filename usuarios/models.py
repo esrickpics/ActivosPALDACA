@@ -11,6 +11,11 @@ class UsuarioAsignado(models.Model):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     cargo = models.CharField(max_length=100, blank=True, null=True)
     departamento = models.CharField(max_length=100, blank=True, null=True)
+    pdf_asignacion = models.FileField(
+        upload_to='usuarios/asignaciones_pdf/',
+        blank=True,
+        null=True
+    )
     activo = models.BooleanField(default=True)
     
     # Campos de auditoría

@@ -48,6 +48,19 @@
                 {% endif %}
             </div>
 
+            <div class="mb-3">
+                <label for="{{ form.prefijo.id_for_label }}" class="form-label">
+                    Prefijo de inventario <span class="text-danger">*</span>
+                </label>
+                {{ form.prefijo }}
+                {% if form.prefijo.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.prefijo.errors }}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted">Se usará para generar códigos como PAL-{{ form.prefijo.value|default:'X'|upper }}-001.</small>
+            </div>
+
             <hr>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <a href="{% url 'activos:subcategoria-list' %}" class="btn btn-secondary">

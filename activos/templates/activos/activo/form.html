@@ -15,21 +15,23 @@
 
             <h5 class="mb-3"><i class="bi bi-info-circle"></i> Información Básica</h5>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.codigo_inventario.id_for_label }}" class="form-label">
-                        Código de Inventario <span class="text-danger">*</span>
-                    </label>
-                    {{ form.codigo_inventario }}
-                    {% if form.codigo_inventario.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.codigo_inventario.errors }}
-                    </div>
-                    {% endif %}
-                    <small class="form-text text-muted">Código único del activo</small>
-                </div>
+            {% if object %}
+            <div class="alert alert-light border mb-3">
+                <i class="bi bi-upc-scan me-1"></i>
+                <strong>Código de Inventario:</strong> {{ object.codigo_inventario }}
+            </div>
+            {% else %}
+            <div class="mb-3 p-3 border rounded bg-light-subtle">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-upc-scan me-1"></i> Código de Inventario
+                </label>
+                <input type="text" class="form-control" placeholder="el codigo se genera de forma automatica" readonly>
+                <small class="text-muted">El sistema genera el código al crear el activo de forma automática.</small>
+            </div>
+            {% endif %}
 
-                <div class="col-md-6 mb-3">
+            <div class="row">
+                <div class="col-md-12 mb-3">
                     <label for="{{ form.subcategoria.id_for_label }}" class="form-label">
                         Subcategoría <span class="text-danger">*</span>
                     </label>
