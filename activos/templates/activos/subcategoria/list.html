@@ -3,18 +3,19 @@
 {% block title %}Subcategorías - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="form-title">
-            <img src="{% static 'core/img/Iconos/nueva-categoria.svg' %}" alt="Icono" style="width: 32px; height: 32px; margin-right: 10px;">
-            Subcategorías
-        </h2>
-        <a href="{% url 'activos:subcategoria-create' %}" class="btn btn-primary-custom">
-            <i class="bi bi-plus-circle"></i> Nueva Subcategoría
-        </a>
-    </div>
-    <hr class="linea" style="border-color: #32407b;">
-<!-- Filtro por categoría -->
+<div class="px-5 py-4 mt-2">
+    <div class="form-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="form-title">
+                <img src="{% static 'core/img/Iconos/nueva-categoria.svg' %}" alt="Icono" style="width: 32px; height: 32px; margin-right: 10px;">
+                Subcategorías
+            </h2>
+            <a href="{% url 'activos:subcategoria-create' %}" class="btn btn-primary-custom">
+                <i class="bi bi-plus-circle"></i> Nueva Subcategoría
+            </a>
+        </div>
+        <hr class="linea" style="border-color: #32407b;">
+
 <div class="card mb-3">
     <div class="card-body">
         <form method="get" class="row g-3">
@@ -22,7 +23,7 @@
                 <select name="categoria" class="form-select" onchange="this.form.submit()">
                     <option value="">Todas las categorías</option>
                     {% for categoria in categorias %}
-                    <option value="{{ categoria.id }}" 
+                    <option value="{{ categoria.id }}"
                             {% if request.GET.categoria == categoria.id|stringformat:"s" %}selected{% endif %}>
                         {{ categoria.nombre }}
                     </option>
@@ -67,11 +68,11 @@
                         </td>
                         <td class="text-end">
                             <div class="btn-group" role="group">
-                                <a href="{% url 'activos:subcategoria-update' subcategoria.pk %}" 
+                                <a href="{% url 'activos:subcategoria-update' subcategoria.pk %}"
                                    class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-pencil"></i> Editar
                                 </a>
-                                <a href="{% url 'activos:subcategoria-delete' subcategoria.pk %}" 
+                                <a href="{% url 'activos:subcategoria-delete' subcategoria.pk %}"
                                    class="btn btn-sm btn-outline-danger">
                                     <i class="bi bi-trash"></i> Eliminar
                                 </a>
@@ -85,7 +86,6 @@
     </div>
 </div>
 
-<!-- Paginación -->
 {% if is_paginated %}
 <nav aria-label="Page navigation" class="mt-3">
     <ul class="pagination justify-content-center">
@@ -118,11 +118,10 @@
 
 {% else %}
 <div class="alert alert-info">
-    <i class="bi bi-info-circle"></i> No hay subcategorías registradas. 
+    <i class="bi bi-info-circle"></i> No hay subcategorías registradas.
     <a href="{% url 'activos:subcategoria-create' %}">Crear la primera subcategoría</a>
 </div>
 {% endif %}
+    </div>
 </div>
 {% endblock %}
-
-

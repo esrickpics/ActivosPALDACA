@@ -3,17 +3,18 @@
 {% block title %}{{ usuario.nombre_completo }} - Perfil - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="form-container">
+<div class="px-4 py-4 usuario-profile-page">
+<div class="form-container usuario-profile-container">
     <!-- Información del usuario -->
     <div class="card mb-4" style="background-color: var(--e-global-color-moradopaldaca); color: white;">
         <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-2">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-md-2">
                     <div class="user-avatar-large text-center">
                         <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
                     </div>
                 </div>
-                <div class="col-md-8">
+                <div class="col-12 col-md-8">
                     <h2 class="mb-2">{{ usuario.nombre_completo }}</h2>
                     <h5 class="mb-3">{{ usuario.cargo|default:"Sin cargo asignado" }}</h5>
                     
@@ -47,12 +48,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2 text-end">
+                <div class="col-12 col-md-2 text-md-end">
                     <div class="user-actions">
                         <a href="{% url 'usuarios:usuario-update' usuario.pk %}" class="btn btn-light btn-sm mb-2">
                             <i class="bi bi-pencil"></i> Editar
                         </a>
-                        <br>
                         <a href="{% url 'usuarios:usuario-delete' usuario.pk %}" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-trash"></i> Eliminar
                         </a>
@@ -73,7 +73,7 @@
         <div class="card-body">
             {% if activos_asignados %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover usuario-activos-table">
                         <thead>
                             <tr>
                                 <th>Código</th>
@@ -87,26 +87,26 @@
                         <tbody>
                             {% for activo in activos_asignados %}
                             <tr>
-                                <td>
+                                <td data-label="Código">
                                     <strong>{{ activo.codigo_inventario }}</strong>
                                 </td>
-                                <td>
+                                <td data-label="Descripción">
                                     {{ activo.marca }} {{ activo.modelo }}
                                     {% if activo.numero_serial %}
                                         <br><small class="text-muted">S/N: {{ activo.numero_serial }}</small>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td data-label="Categoría">
                                     <span class="badge bg-info">
                                         {{ activo.subcategoria.categoria.nombre }}
                                     </span>
                                     <br>
                                     <small class="text-muted">{{ activo.subcategoria.nombre }}</small>
                                 </td>
-                                <td>
+                                <td data-label="Ubicación">
                                     <i class="bi bi-geo-alt"></i> {{ activo.ubicacion.nombre }}
                                 </td>
-                                <td>
+                                <td data-label="Estado">
                                     {% if activo.estado == 'AC' %}
                                         <span class="badge bg-success">Activo</span>
                                     {% elif activo.estado == 'IN' %}
@@ -115,7 +115,7 @@
                                         <span class="badge bg-warning">En Mantenimiento</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end">
+                                <td class="text-end" data-label="Acciones">
                                     <a href="{% url 'activos:activo-detail' activo.pk %}" 
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i> Ver
@@ -143,6 +143,7 @@
         </a>
     </div>
 </div>
+</div>
 
 <style>
 .user-avatar-large {
@@ -161,6 +162,53 @@
 .table th {
     background-color: #f8f9fa;
     border-top: none;
+}
+@media (max-width: 767.98px) {
+    .usuario-profile-page {
+        padding: 0.9rem 0.4rem !important;
+    }
+    .usuario-profile-container {
+        padding: 1rem !important;
+    }
+    .user-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .user-actions .btn {
+        width: 100%;
+    }
+    .usuario-activos-table thead {
+        display: none;
+    }
+    .usuario-activos-table tbody,
+    .usuario-activos-table tr,
+    .usuario-activos-table td {
+        display: block;
+        width: 100%;
+    }
+    .usuario-activos-table tr {
+        background: #fff;
+        border: 1px solid #e7ecfa;
+        border-radius: 12px;
+        padding: 0.6rem 0.75rem;
+        margin-bottom: 0.7rem;
+        box-shadow: 0 4px 10px rgba(20, 22, 68, 0.06);
+    }
+    .usuario-activos-table td {
+        border: 0 !important;
+        padding: 0.35rem 0 !important;
+        text-align: left !important;
+    }
+    .usuario-activos-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #5e6a9f;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.15rem;
+    }
 }
 </style>
 {% endblock %}

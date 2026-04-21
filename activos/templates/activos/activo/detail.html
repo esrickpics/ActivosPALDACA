@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load activo_filters %}
+{% block title %}{{ activo.codigo_inventario }} - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+ <link rel="stylesheet" href="{% static 'css/perfil_activos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="asset-detail-page">
+    <div class="asset-hero">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <h1 class="asset-hero-title mb-1">
+                    <i class="bi bi-box-seam me-2"></i> Detalle del Activo
+                </h1>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="asset-hero-code">
+                        <i class="bi bi-upc-scan"></i> {{ activo.codigo_inventario }}
+                    </span>
+                    {% if activo.estado == 'AC' %}
+                    <span class="asset-status-badge"><i class="bi bi-check-circle"></i> Activo</span>
+                    {% elif activo.estado == 'IN' %}
+                    <span class="asset-status-badge"><i class="bi bi-pause-circle"></i> Inactivo</span>
+                    {% else %}
+                    <span class="asset-status-badge"><i class="bi bi-tools"></i> En Mantenimiento</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="asset-actions">
+                <a href="{% url 'activos:activo-list' %}" class="btn btn-light asset-btn">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+                <a href="{% url 'activos:activo-update' activo.pk %}" class="btn asset-btn asset-btn-action asset-btn-edit">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <a href="{% url 'activos:activo-historial' activo.pk %}" class="btn asset-btn asset-btn-action asset-btn-history">
+                    <i class="bi bi-clock-history"></i> Historial
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-9">
+        <div class="card asset-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información General</h5>
+            </div>
+            <div class="card-body">
+                <div class="asset-info-grid mb-3">
+                    <div class="asset-info-item">
+                        <div class="asset-info-label">Código de inventario</div>
+                        <div class="asset-info-value">{{ activo.codigo_inventario }}</div>
+                    </div>
+                    <div class="asset-info-item">
+                        <div class="asset-info-label">Categoría</div>
+                        <div class="asset-info-value">{{ activo.subcategoria.categoria.nombre }}</div>
+                    </div>
+                    <div class="asset-info-item">
+                        <div class="asset-info-label">Subcategoría</div>
+                        <div class="asset-info-value">{{ activo.subcategoria.nombre }}</div>
+                    </div>
+                    <div class="asset-info-item">
+                        <div class="asset-info-label">Marca</div>
+                        <div class="asset-info-value">{{ activo.marca }}</div>
+                    </div>
+                    <div class="asset-info-item">
+                        <div class="asset-info-label">Modelo</div>
+                        <div class="asset-info-value">{{ activo.modelo }}</div>
+                    </div>
+                    <div class="asset-info-item">
+                        <div class="asset-info-label">Número de serie</div>
+                        <div class="asset-info-value">{{ activo.numero_serial|default:"No especificado" }}</div>
+                    </div>
+                    <div class="asset-info-item">
+                        <div class="asset-info-label">Ubicación</div>
+                        <div class="asset-info-value">{{ activo.ubicacion.nombre }}</div>
+                    </div>
+                    <div class="asset-info-item">
+                        <div class="asset-info-label">Usuario asignado</div>
+                        <div class="asset-info-value">{{ activo.usuario_asignado|default:"Sin asignar" }}</div>
+                    </div>
+                </div>
+
+                {% if activo.observaciones %}
+                <div class="asset-info-item">
+                    <div class="asset-info-label">Observaciones</div>
+                    <div class="asset-info-value">{{ activo.observaciones }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card asset-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Auditoría</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill-muted"><i class="bi bi-calendar-plus"></i> Creado: {{ activo.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                    <span class="pill-muted"><i class="bi bi-arrow-repeat"></i> Actualizado: {{ activo.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Mantenimientos -->
+        <div class="card asset-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-tools"></i> Historial de Mantenimientos</h5>
+                <a href="{% url 'mantenimientos:mantenimiento-create' %}?activo_id={{ activo.pk }}" class="btn btn-sm btn-custom asset-btn">
+                    <i class="bi bi-plus-circle"></i> Agregar
+                </a>
+            </div>
+            <div class="card-body">
+                {% if activo.mantenimientos.all %}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle asset-maint-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Técnico</th>
+                                <th>Costo</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mantenimiento in activo.mantenimientos.all %}
+                            <tr>
+                                <td>{{ mantenimiento.fecha|date:"d/m/Y" }}</td>
+                                <td>{{ mantenimiento.tecnico }}</td>
+                                <td>${{ mantenimiento.costo|floatformat:2 }}</td>
+                                <td>
+                                    {% if mantenimiento.estado == 'EP' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-hourglass-split"></i> En Proceso
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Finalizado
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'mantenimientos:mantenimiento-detail' mantenimiento.pk %}" 
+                                       class="btn btn-sm btn-outline-primary asset-btn" title="Ver detalle">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <strong>Total mantenimientos:</strong>
+                    <span class="badge bg-primary">{{ activo.mantenimientos.count }}</span>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <strong>Costo total:</strong>
+                    <span class="text-primary fw-bold">${{ activo.mantenimientos.all|sum_costo|floatformat:2 }}</span>
+                </div>
+                {% else %}
+                <div class="asset-maint-empty text-center text-muted">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2 mb-0">No hay mantenimientos registrados</p>
+                    <a href="{% url 'mantenimientos:mantenimiento-create' %}?activo_id={{ activo.pk }}" class="btn btn-sm btn-custom mt-3 asset-btn">
+                        <i class="bi bi-plus-circle"></i> Agregar Primer Mantenimiento
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="asset-actions-column">
+                <div class="asset-actions-column-title">
+                    <i class="bi bi-lightning-charge me-1"></i> Acciones rápidas
+                </div>
+                <div class="asset-toolbar-meta mb-3">
+                    <span class="asset-toolbar-pill">
+                        <i class="bi bi-geo-alt"></i> {{ activo.ubicacion.nombre }}
+                    </span>
+                    <span class="asset-toolbar-pill">
+                        <i class="bi bi-person-badge"></i>
+                        {% if activo.usuario_asignado %}{{ activo.usuario_asignado }}{% else %}Sin asignar{% endif %}
+                    </span>
+                </div>
+                <div class="asset-actions-column-buttons">
+                    <a href="{% url 'activos:activo-reubicar' activo.pk %}" class="btn btn-sm asset-btn asset-btn-subtle w-100">
+                        <i class="bi bi-geo me-1"></i> Reubicar
+                    </a>
+                    <a href="{% url 'activos:activo-reasignar' activo.pk %}" class="btn btn-sm asset-btn asset-btn-subtle w-100">
+                        <i class="bi bi-person-gear me-1"></i> Reasignar
+                    </a>
+                    <a href="{% url 'activos:activo-delete' activo.pk %}" class="btn btn-sm asset-btn asset-btn-subtle asset-btn-subtle-danger w-100">
+                        <i class="bi bi-trash me-1"></i> Eliminar
+                    </a>
+                </div>
+            </div>
+        </div>
+</div>
+</div>
+{% endblock %}

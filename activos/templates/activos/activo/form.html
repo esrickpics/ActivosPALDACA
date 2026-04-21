@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ object|yesno:"Editar,Crear" }} Activo - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="px-5 py-4 mt-2">
+    <div class="form-container">
+        <h2 class="form-title">
+            <img src="{% static 'core/img/Iconos/activos.svg' %}" alt="Icono" style="width: 40px; height: 40px; margin-right: 15px;">
+            {% if object %}Editar Activo{% else %}Crear Nuevo Activo{% endif %}
+        </h2>
+        <hr class="linea" style="border-color: #32407b;">
+        <form method="post">
+            {% csrf_token %}
+
+            <h5 class="mb-3"><i class="bi bi-info-circle"></i> Información Básica</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.codigo_inventario.id_for_label }}" class="form-label">
+                        Código de Inventario <span class="text-danger">*</span>
+                    </label>
+                    {{ form.codigo_inventario }}
+                    {% if form.codigo_inventario.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.codigo_inventario.errors }}
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Código único del activo</small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.subcategoria.id_for_label }}" class="form-label">
+                        Subcategoría <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        {{ form.subcategoria }}
+                        <button type="button" class="btn btn-outline-secondary" onclick="window.open('{% url 'activos:subcategoria-create' %}', '_blank')">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    {% if form.subcategoria.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.subcategoria.errors }}
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">
+                        <a href="{% url 'activos:categoria-create' %}" target="_blank" class="text-decoration-none">
+                            <i class="bi bi-plus-circle"></i> Crear nueva categoría
+                        </a>
+                    </small>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.marca.id_for_label }}" class="form-label">
+                        Marca <span class="text-danger">*</span>
+                    </label>
+                    {{ form.marca }}
+                    {% if form.marca.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.marca.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.modelo.id_for_label }}" class="form-label">
+                        Modelo <span class="text-danger">*</span>
+                    </label>
+                    {{ form.modelo }}
+                    {% if form.modelo.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.modelo.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.numero_serial.id_for_label }}" class="form-label">
+                    Número de Serie
+                </label>
+                {{ form.numero_serial }}
+                {% if form.numero_serial.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.numero_serial.errors }}
+                </div>
+                {% endif %}
+            </div>
+
+            <hr>
+            <h5 class="mb-3"><i class="bi bi-geo-alt"></i> Ubicación y Asignación</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.ubicacion.id_for_label }}" class="form-label">
+                        Ubicación <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        {{ form.ubicacion }}
+                        <button type="button" class="btn btn-outline-secondary" onclick="window.open('{% url 'activos:ubicacion-create' %}', '_blank')">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    {% if form.ubicacion.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.ubicacion.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.usuario_asignado.id_for_label }}" class="form-label">
+                        Usuario Asignado
+                    </label>
+                    {{ form.usuario_asignado }}
+                    {% if form.usuario_asignado.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.usuario_asignado.errors }}
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Opcional</small>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.estado.id_for_label }}" class="form-label">
+                    Estado <span class="text-danger">*</span>
+                </label>
+                {{ form.estado }}
+                {% if form.estado.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.estado.errors }}
+                </div>
+                {% endif %}
+            </div>
+
+            <hr>
+            <h5 class="mb-3"><i class="bi bi-file-text"></i> Detalles Adicionales</h5>
+
+            <div class="mb-3">
+                <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                    Observaciones
+                </label>
+                {{ form.observaciones }}
+                {% if form.observaciones.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.observaciones.errors }}
+                </div>
+                {% endif %}
+            </div>
+
+            <hr>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'activos:activo-list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

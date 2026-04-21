@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 # ============== VISTAS DE CATEGORÍA ==============
 class CategoriaListView(LoginRequiredMixin, ListView):
     model = Categoria
-    template_name = 'activos/categoria_list.html'
+    template_name = 'activos/categoria/list.html'
     context_object_name = 'categorias'
     paginate_by = 20
 
@@ -24,7 +24,7 @@ class CategoriaListView(LoginRequiredMixin, ListView):
 class CategoriaCreateView(LoginRequiredMixin, CreateView):
     model = Categoria
     form_class = CategoriaForm
-    template_name = 'activos/categoria_form.html'
+    template_name = 'activos/categoria/form.html'
     success_url = reverse_lazy('activos:categoria-list')
     
     def form_valid(self, form):
@@ -35,7 +35,7 @@ class CategoriaCreateView(LoginRequiredMixin, CreateView):
 class CategoriaUpdateView(LoginRequiredMixin, UpdateView):
     model = Categoria
     form_class = CategoriaForm
-    template_name = 'activos/categoria_form.html'
+    template_name = 'activos/categoria/form.html'
     success_url = reverse_lazy('activos:categoria-list')
     
     def form_valid(self, form):
@@ -45,7 +45,7 @@ class CategoriaUpdateView(LoginRequiredMixin, UpdateView):
 
 class CategoriaDeleteView(LoginRequiredMixin, DeleteView):
     model = Categoria
-    template_name = 'activos/categoria_confirm_delete.html'
+    template_name = 'activos/categoria/confirm_delete.html'
     success_url = reverse_lazy('activos:categoria-list')
     
     def delete(self, request, *args, **kwargs):
@@ -64,7 +64,7 @@ class CategoriaDeleteView(LoginRequiredMixin, DeleteView):
 
 class SubCategoriaListView(LoginRequiredMixin, ListView):
     model = SubCategoria
-    template_name = 'activos/subcategoria_list.html'
+    template_name = 'activos/subcategoria/list.html'
     context_object_name = 'subcategorias'
     paginate_by = 20
     
@@ -84,7 +84,7 @@ class SubCategoriaListView(LoginRequiredMixin, ListView):
 class SubCategoriaCreateView(LoginRequiredMixin, CreateView):
     model = SubCategoria
     form_class = SubCategoriaForm
-    template_name = 'activos/subcategoria_form.html'
+    template_name = 'activos/subcategoria/form.html'
     success_url = reverse_lazy('activos:subcategoria-list')
     
     def form_valid(self, form):
@@ -95,7 +95,7 @@ class SubCategoriaCreateView(LoginRequiredMixin, CreateView):
 class SubCategoriaUpdateView(LoginRequiredMixin, UpdateView):
     model = SubCategoria
     form_class = SubCategoriaForm
-    template_name = 'activos/subcategoria_form.html'
+    template_name = 'activos/subcategoria/form.html'
     success_url = reverse_lazy('activos:subcategoria-list')
     
     def form_valid(self, form):
@@ -105,7 +105,7 @@ class SubCategoriaUpdateView(LoginRequiredMixin, UpdateView):
 
 class SubCategoriaDeleteView(LoginRequiredMixin, DeleteView):
     model = SubCategoria
-    template_name = 'activos/subcategoria_confirm_delete.html'
+    template_name = 'activos/subcategoria/confirm_delete.html'
     success_url = reverse_lazy('activos:subcategoria-list')
     
     def delete(self, request, *args, **kwargs):
@@ -124,7 +124,7 @@ class SubCategoriaDeleteView(LoginRequiredMixin, DeleteView):
 
 class UbicacionListView(LoginRequiredMixin, ListView):
     model = Ubicacion
-    template_name = 'activos/ubicacion_list.html'
+    template_name = 'activos/ubicacion/list.html'
     context_object_name = 'ubicaciones'
     paginate_by = 20
 
@@ -132,7 +132,7 @@ class UbicacionListView(LoginRequiredMixin, ListView):
 class UbicacionCreateView(LoginRequiredMixin, CreateView):
     model = Ubicacion
     form_class = UbicacionForm
-    template_name = 'activos/ubicacion_form.html'
+    template_name = 'activos/ubicacion/form.html'
     success_url = reverse_lazy('activos:ubicacion-list')
     
     def form_valid(self, form):
@@ -143,7 +143,7 @@ class UbicacionCreateView(LoginRequiredMixin, CreateView):
 class UbicacionUpdateView(LoginRequiredMixin, UpdateView):
     model = Ubicacion
     form_class = UbicacionForm
-    template_name = 'activos/ubicacion_form.html'
+    template_name = 'activos/ubicacion/form.html'
     success_url = reverse_lazy('activos:ubicacion-list')
     
     def form_valid(self, form):
@@ -153,7 +153,7 @@ class UbicacionUpdateView(LoginRequiredMixin, UpdateView):
 
 class UbicacionDeleteView(LoginRequiredMixin, DeleteView):
     model = Ubicacion
-    template_name = 'activos/ubicacion_confirm_delete.html'
+    template_name = 'activos/ubicacion/confirm_delete.html'
     success_url = reverse_lazy('activos:ubicacion-list')
     
     def delete(self, request, *args, **kwargs):
@@ -172,7 +172,7 @@ class UbicacionDeleteView(LoginRequiredMixin, DeleteView):
 
 class ActivoListView(LoginRequiredMixin, ListView):
     model = Activo
-    template_name = 'activos/activo_list.html'
+    template_name = 'activos/activo/list.html'
     context_object_name = 'activos'
     paginate_by = 25
     
@@ -232,7 +232,7 @@ class ActivoListView(LoginRequiredMixin, ListView):
 
 class ActivoDetailView(LoginRequiredMixin, DetailView):
     model = Activo
-    template_name = 'activos/activo_detail.html'
+    template_name = 'activos/activo/detail.html'
     context_object_name = 'activo'
     
     def get_queryset(self):
@@ -244,7 +244,7 @@ class ActivoDetailView(LoginRequiredMixin, DetailView):
 class ActivoCreateView(LoginRequiredMixin, CreateView):
     model = Activo
     form_class = ActivoForm
-    template_name = 'activos/activo_form.html'
+    template_name = 'activos/activo/form.html'
     success_url = reverse_lazy('activos:activo-list')
     
     def form_valid(self, form):
@@ -255,7 +255,7 @@ class ActivoCreateView(LoginRequiredMixin, CreateView):
 class ActivoUpdateView(LoginRequiredMixin, UpdateView):
     model = Activo
     form_class = ActivoForm
-    template_name = 'activos/activo_form.html'
+    template_name = 'activos/activo/form.html'
     success_url = reverse_lazy('activos:activo-list')
     
     def form_valid(self, form):
@@ -265,7 +265,7 @@ class ActivoUpdateView(LoginRequiredMixin, UpdateView):
 
 class ActivoDeleteView(LoginRequiredMixin, DeleteView):
     model = Activo
-    template_name = 'activos/activo_confirm_delete.html'
+    template_name = 'activos/activo/confirm_delete.html'
     success_url = reverse_lazy('activos:activo-list')
     
     def delete(self, request, *args, **kwargs):
@@ -281,15 +281,34 @@ def reasignar_activo(request, pk):
     activo = get_object_or_404(Activo, pk=pk)
     
     if request.method == 'POST':
+        # Guardamos estado original desde BD antes de que el ModelForm
+        # muta la instancia en memoria durante is_valid().
+        activo_original = Activo.objects.select_related('usuario_asignado').get(pk=pk)
         form = ReasignarActivoForm(request.POST, instance=activo)
         if form.is_valid():
-            form.save()
+            usuario_anterior = activo_original.usuario_asignado
+            activo_actualizado = form.save()
+            usuario_nuevo = activo_actualizado.usuario_asignado
+
+            if (usuario_anterior.id if usuario_anterior else None) != (usuario_nuevo.id if usuario_nuevo else None):
+                valor_anterior = str(usuario_anterior) if usuario_anterior else 'Sin asignar'
+                valor_nuevo = str(usuario_nuevo) if usuario_nuevo else 'Sin asignar'
+                HistorialMovimiento.objects.create(
+                    activo=activo_actualizado,
+                    tipo_movimiento=HistorialMovimiento.TipoMovimiento.REASIGNACION,
+                    descripcion=f"Reasignación de usuario: {valor_anterior} -> {valor_nuevo}",
+                    campo_modificado='usuario_asignado',
+                    valor_anterior=valor_anterior,
+                    valor_nuevo=valor_nuevo,
+                    usuario=request.user if request.user.is_authenticated else None,
+                )
+
             messages.success(request, f'Activo {activo.codigo_inventario} reasignado exitosamente.')
             return redirect('activos:activo-detail', pk=pk)
     else:
         form = ReasignarActivoForm(instance=activo)
     
-    return render(request, 'activos/activo_reasignar.html', {
+    return render(request, 'activos/activo/reasignar.html', {
         'form': form,
         'activo': activo
     })
@@ -301,15 +320,34 @@ def reubicar_activo(request, pk):
     activo = get_object_or_404(Activo, pk=pk)
     
     if request.method == 'POST':
+        # Guardamos estado original desde BD antes de que el ModelForm
+        # muta la instancia en memoria durante is_valid().
+        activo_original = Activo.objects.select_related('ubicacion').get(pk=pk)
         form = ReubicarActivoForm(request.POST, instance=activo)
         if form.is_valid():
-            form.save()
+            ubicacion_anterior = activo_original.ubicacion
+            activo_actualizado = form.save()
+            ubicacion_nueva = activo_actualizado.ubicacion
+
+            if (ubicacion_anterior.id if ubicacion_anterior else None) != (ubicacion_nueva.id if ubicacion_nueva else None):
+                valor_anterior = ubicacion_anterior.nombre if ubicacion_anterior else 'Sin ubicación'
+                valor_nuevo = ubicacion_nueva.nombre if ubicacion_nueva else 'Sin ubicación'
+                HistorialMovimiento.objects.create(
+                    activo=activo_actualizado,
+                    tipo_movimiento=HistorialMovimiento.TipoMovimiento.REUBICACION,
+                    descripcion=f"Reubicación: {valor_anterior} -> {valor_nuevo}",
+                    campo_modificado='ubicacion',
+                    valor_anterior=valor_anterior,
+                    valor_nuevo=valor_nuevo,
+                    usuario=request.user if request.user.is_authenticated else None,
+                )
+
             messages.success(request, f'Activo {activo.codigo_inventario} reubicado exitosamente.')
             return redirect('activos:activo-detail', pk=pk)
     else:
         form = ReubicarActivoForm(instance=activo)
     
-    return render(request, 'activos/activo_reubicar.html', {
+    return render(request, 'activos/activo/reubicar.html', {
         'form': form,
         'activo': activo
     })
@@ -318,7 +356,7 @@ def reubicar_activo(request, pk):
 class ActivoHistorialView(LoginRequiredMixin, DetailView):
     """Vista para mostrar el historial de movimientos de un activo"""
     model = Activo
-    template_name = 'activos/activo_historial.html'
+    template_name = 'activos/activo/historial.html'
     context_object_name = 'activo'
     
     def get_context_data(self, **kwargs):

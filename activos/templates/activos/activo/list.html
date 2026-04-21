@@ -13,11 +13,157 @@
         background-color: var(--e-global-color-azul);
         border-color: var(--e-global-color-azul);
     }
+    .btn-report-pdf {
+        background-color: #ffffff;
+        border: 1px solid #d0d7ef;
+        color: #32407b;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    .btn-report-pdf:hover {
+        background-color: #32407b;
+        border-color: #32407b;
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+    .table-activos {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .table-activos thead th {
+        background-color: #f6f8ff;
+        color: #32407b;
+        font-size: 0.84rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        border-bottom: 1px solid #dbe2f5;
+        padding: 0.85rem 0.75rem;
+        white-space: nowrap;
+    }
+    .table-activos tbody td {
+        vertical-align: middle;
+        padding: 0.8rem 0.75rem;
+        border-bottom: 1px solid #edf1fb;
+    }
+    .table-activos tbody tr:hover {
+        background-color: #fafbff;
+    }
+    .acciones-header {
+        width: 1%;
+    }
+    .table-actions-trigger {
+        opacity: 0;
+        transition: opacity 0.2s ease, background-color 0.2s ease;
+        border-radius: 999px;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .table-activos tbody tr:hover .table-actions-trigger,
+    .table-actions-trigger:focus,
+    .table-actions-trigger:active {
+        opacity: 1;
+    }
+    @media (max-width: 991.98px) {
+        .table-actions-trigger {
+            opacity: 1;
+        }
+    }
+    @media (max-width: 767.98px) {
+        .activos-page {
+            padding: 0.9rem 0.4rem !important;
+        }
+        .activos-page .form-container {
+            padding: 1rem !important;
+        }
+        .activos-page .form-title {
+            font-size: 1.2rem;
+            align-items: flex-start;
+        }
+        .activos-page .form-title img {
+            width: 30px !important;
+            height: 30px !important;
+            margin-right: 10px !important;
+            margin-top: 2px;
+        }
+        .activos-page .d-flex.justify-content-between.align-items-center.mb-3 {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 0.7rem;
+        }
+        .activos-page .d-flex.justify-content-between.align-items-center.mb-3 > a {
+            width: 100%;
+        }
+        .activos-page .card-header.d-flex.justify-content-between.align-items-center {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 0.65rem;
+        }
+        .activos-page .card-header .d-flex.gap-2 {
+            flex-direction: column;
+            width: 100%;
+        }
+        .activos-page .card-header .d-flex.gap-2 .btn,
+        .activos-page .card-header .d-flex.gap-2 form {
+            width: 100%;
+        }
+        .activos-page .card-header .d-flex.gap-2 form .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .table-activos thead {
+            display: none;
+        }
+        .table-activos tbody,
+        .table-activos tr,
+        .table-activos td {
+            display: block;
+            width: 100%;
+        }
+        .table-activos tr {
+            background: #fff;
+            border: 1px solid #e7ecfa;
+            border-radius: 12px;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 4px 10px rgba(20, 22, 68, 0.06);
+        }
+        .table-activos td {
+            border: 0 !important;
+            padding: 0.35rem 0 !important;
+            text-align: left !important;
+        }
+        .table-activos td::before {
+            content: attr(data-label);
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #5e6a9f;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.15rem;
+        }
+        .table-activos td.selection-column::before {
+            content: "Seleccionar";
+        }
+        .table-activos .dropdown .btn {
+            opacity: 1 !important;
+        }
+        #notaEntregaSection .row > div {
+            margin-bottom: 0.5rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="px-5 py-4">
+<div class="px-5 py-4 mt-2 activos-page">
     <div class="form-container">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="form-title mb-0">
@@ -39,8 +185,9 @@
                 {% for key, value in request.GET.items %}
                     <input type="hidden" name="{{ key }}" value="{{ value }}">
                 {% endfor %}
-                <button type="submit" class="btn btn-outline-primary btn-sm" title="Generar reporte PDF de todos los activos filtrados">
-                    <i class="bi bi-file-earmark-pdf"></i> Reporte PDF
+                <button type="submit" class="btn btn-sm btn-report-pdf d-inline-flex align-items-center gap-2" title="Generar reporte PDF de todos los activos filtrados">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                    <span>Reporte PDF</span>
                 </button>
             </form>
             
@@ -96,7 +243,7 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover table-activos">
                 <thead>
                     <tr>
                         <th class="selection-column" style="display: none;">
@@ -108,42 +255,44 @@
                         <th>Ubicación</th>
                         <th>Usuario</th>
                         <th>Estado</th>
-                        <th class="text-end">Acciones</th>
+                        <th class="text-end acciones-header">
+                            <span class="visually-hidden">Acciones</span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for activo in activos %}
                     <tr>
-                        <td class="selection-column" style="display: none;">
-                            <input type="checkbox" name="activos_seleccionados" value="{{ activo.pk }}" 
+                        <td class="selection-column" style="display: none;" data-label="Seleccionar">
+                            <input type="checkbox" name="activos_seleccionados" value="{{ activo.pk }}"
                                    class="form-check-input activo-checkbox">
                         </td>
-                        <td>
+                        <td data-label="Código">
                             <a href="{% url 'activos:activo-detail' activo.pk %}" class="text-decoration-none">
                                 <strong>{{ activo.codigo_inventario }}</strong>
                             </a>
                         </td>
-                        <td>
+                        <td data-label="Categoría">
                             <small class="text-muted">{{ activo.subcategoria.categoria.nombre }}</small><br>
                             <span class="badge bg-secondary">{{ activo.subcategoria.nombre }}</span>
                         </td>
-                        <td>
+                        <td data-label="Marca / Modelo">
                             {{ activo.marca }} {{ activo.modelo }}
                             {% if activo.numero_serial %}
                             <br><small class="text-muted">S/N: {{ activo.numero_serial }}</small>
                             {% endif %}
                         </td>
-                        <td>
+                        <td data-label="Ubicación">
                             <i class="bi bi-geo-alt"></i> {{ activo.ubicacion.nombre }}
                         </td>
-                        <td>
+                        <td data-label="Usuario">
                             {% if activo.usuario_asignado %}
                             <i class="bi bi-person"></i> {{ activo.usuario_asignado }}
                             {% else %}
                             <span class="text-muted">Sin asignar</span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td data-label="Estado">
                             {% if activo.estado == 'AC' %}
                             <span class="badge bg-success">Activo</span>
                             {% elif activo.estado == 'IN' %}
@@ -152,24 +301,37 @@
                             <span class="badge bg-warning">En Mantenimiento</span>
                             {% endif %}
                         </td>
-                        <td class="text-end">
-                            <div class="btn-group" role="group">
-                                <a href="{% url 'activos:activo-detail' activo.pk %}" 
-                                   class="btn btn-sm btn-outline-info" title="Ver detalles">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{% url 'mantenimientos:mantenimiento-create' %}?activo_id={{ activo.pk }}" 
-                                   class="btn btn-sm btn-outline-warning" title="Agregar mantenimiento">
-                                    <i class="bi bi-tools"></i>
-                                </a>
-                                <a href="{% url 'activos:activo-update' activo.pk %}" 
-                                   class="btn btn-sm btn-outline-primary" title="Editar">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="{% url 'activos:activo-delete' activo.pk %}" 
-                                   class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                        <td class="text-end" data-label="Acciones">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary table-actions-trigger" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                        title="Más acciones">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                    <span class="visually-hidden">Abrir menú de acciones</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'activos:activo-detail' activo.pk %}">
+                                            <i class="bi bi-eye me-2"></i> Ver detalles
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'mantenimientos:mantenimiento-create' %}?activo_id={{ activo.pk }}">
+                                            <i class="bi bi-tools me-2"></i> Agregar mantenimiento
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'activos:activo-update' activo.pk %}">
+                                            <i class="bi bi-pencil me-2"></i> Editar
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="{% url 'activos:activo-delete' activo.pk %}">
+                                            <i class="bi bi-trash me-2"></i> Eliminar
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
                         </td>
                     </tr>
@@ -191,12 +353,12 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Responsable de entrega</label>
-                    <input type="text" name="responsable_entrega" class="form-control form-control-sm" 
+                    <input type="text" name="responsable_entrega" class="form-control form-control-sm"
                            placeholder="Nombre del responsable" required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Observaciones</label>
-                    <input type="text" name="observaciones" class="form-control form-control-sm" 
+                    <input type="text" name="observaciones" class="form-control form-control-sm"
                            placeholder="Observaciones (opcional)">
                 </div>
                 <div class="col-md-2">
@@ -243,12 +405,12 @@
 
 {% else %}
 <div class="alert alert-info">
-    <i class="bi bi-info-circle"></i> 
+    <i class="bi bi-info-circle"></i>
     {% if request.GET %}
     No se encontraron activos con los filtros aplicados.
     <a href="{% url 'activos:activo-list' %}">Limpiar filtros</a>
     {% else %}
-    No hay activos registrados. 
+    No hay activos registrados.
     <a href="{% url 'activos:activo-create' %}">Crear el primer activo</a>
     {% endif %}
 </div>
@@ -258,7 +420,7 @@
 <div class="row mb-3 mt-3">
     <div class="col-md-12">
         <div class="alert alert-info mb-0">
-            <i class="bi bi-info-circle"></i> 
+            <i class="bi bi-info-circle"></i>
             Total de activos: <strong>{{ total_activos }}</strong>
             {% if request.GET %}
             (filtrados de {{ page_obj.paginator.count }} resultados)
@@ -383,13 +545,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnNotaEntrega = document.getElementById('btnNotaEntrega');
     const notaEntregaForm = document.getElementById('notaEntregaForm');
     const notaEntregaSection = document.getElementById('notaEntregaSection');
-    
+
     let selectionMode = false;
-    
+
     // Toggle selection mode
     toggleBtn.addEventListener('click', function() {
         selectionMode = !selectionMode;
-        
+
         if (selectionMode) {
             // Activar modo selección
             selectionColumns.forEach(col => col.style.display = 'table-cell');
@@ -404,14 +566,14 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleBtn.innerHTML = '<i class="bi bi-check-square"></i> Seleccionar';
             toggleBtn.classList.remove('btn-secondary');
             toggleBtn.classList.add('btn-outline-secondary');
-            
+
             // Limpiar selecciones
             selectAllCheckbox.checked = false;
             activoCheckboxes.forEach(cb => cb.checked = false);
             btnNotaEntrega.disabled = true;
         }
     });
-    
+
     // Select all functionality
     selectAllCheckbox.addEventListener('change', function() {
         activoCheckboxes.forEach(cb => {
@@ -419,7 +581,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         updateNotaEntregaButton();
     });
-    
+
     // Individual checkbox change
     activoCheckboxes.forEach(cb => {
         cb.addEventListener('change', function() {
@@ -427,24 +589,24 @@ document.addEventListener('DOMContentLoaded', function() {
             updateNotaEntregaButton();
         });
     });
-    
+
     function updateSelectAllState() {
         const checkedBoxes = document.querySelectorAll('.activo-checkbox:checked');
         selectAllCheckbox.checked = checkedBoxes.length === activoCheckboxes.length;
         selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < activoCheckboxes.length;
     }
-    
+
     function updateNotaEntregaButton() {
         const checkedBoxes = document.querySelectorAll('.activo-checkbox:checked');
         btnNotaEntrega.disabled = checkedBoxes.length === 0;
-        
+
         if (checkedBoxes.length > 0) {
             btnNotaEntrega.innerHTML = `<i class="bi bi-clipboard-check"></i> Generar Nota (${checkedBoxes.length})`;
         } else {
             btnNotaEntrega.innerHTML = '<i class="bi bi-clipboard-check"></i> Generar Nota';
         }
     }
-    
+
     // Form submission validation
     notaEntregaForm.addEventListener('submit', function(e) {
         const checkedBoxes = document.querySelectorAll('.activo-checkbox:checked');
@@ -453,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Debe seleccionar al menos un activo para generar la nota de entrega.');
             return false;
         }
-        
+
         // Agregar los IDs de los activos seleccionados al formulario
         checkedBoxes.forEach(function(checkbox) {
             const hiddenInput = document.createElement('input');
@@ -466,4 +628,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
-

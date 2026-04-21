@@ -657,6 +657,15 @@ body.app-layout--login .app-content-wrap {
     object-fit: contain;
 }
 
+.app-sidebar-logo--full {
+    display: block;
+}
+
+.app-sidebar-logo--compact {
+    display: none;
+    max-height: 32px;
+}
+
 .app-sidebar-nav {
     flex: 1;
     display: flex;
@@ -888,8 +897,12 @@ body.app-layout .main-content {
         justify-content: center;
     }
 
-    #sidebar.menu-toggle .app-sidebar-logo {
-        max-height: 32px;
+    #sidebar.menu-toggle .app-sidebar-logo--full {
+        display: none;
+    }
+
+    #sidebar.menu-toggle .app-sidebar-logo--compact {
+        display: block;
     }
 
     #sidebar.menu-toggle .app-sidebar-label {
