@@ -262,8 +262,26 @@ class ActivoUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('activos:activo-list')
     
     def form_valid(self, form):
+        pk = self.object.pk
+        activo_original = Activo.objects.select_related(
+            'ubicacion', 'usuario_asignado'
+        ).get(pk=pk)
+        response = super().form_valid(form)
+        activo_actualizado = self.object
+        _registrar_reubicacion_en_historial(
+            activo_actualizado,
+            activo_original.ubicacion,
+            activo_actualizado.ubicacion,
+            self.request.user,
+        )
+        _registrar_reasignacion_en_historial(
+            activo_actualizado,
+            activo_original.usuario_asignado,
+            activo_actualizado.usuario_asignado,
+            self.request.user,
+        )
         messages.success(self.request, 'Activo actualizado exitosamente.')
-        return super().form_valid(form)
+        return response
 
 
 class ActivoDeleteView(LoginRequiredMixin, DeleteView):
@@ -274,6 +292,44 @@ class ActivoDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Activo eliminado exitosamente.')
         return super().delete(request, *args, **kwargs)
+
+
+def _registrar_reubicacion_en_historial(activo, ubicacion_anterior, ubicacion_nueva, usuario):
+    """Si cambió la ubicación, registra una entrada de tipo reubicación (misma semántica que reubicar_activo)."""
+    if (ubicacion_anterior.id if ubicacion_anterior else None) == (
+        ubicacion_nueva.id if ubicacion_nueva else None
+    ):
+        return
+    valor_anterior = ubicacion_anterior.nombre if ubicacion_anterior else 'Sin ubicación'
+    valor_nuevo = ubicacion_nueva.nombre if ubicacion_nueva else 'Sin ubicación'
+    HistorialMovimiento.objects.create(
+        activo=activo,
+        tipo_movimiento=HistorialMovimiento.TipoMovimiento.REUBICACION,
+        descripcion=f"Reubicación: {valor_anterior} -> {valor_nuevo}",
+        campo_modificado='ubicacion',
+        valor_anterior=valor_anterior,
+        valor_nuevo=valor_nuevo,
+        usuario=usuario if usuario and usuario.is_authenticated else None,
+    )
+
+
+def _registrar_reasignacion_en_historial(activo, usuario_anterior, usuario_nuevo, usuario):
+    """Si cambió el usuario asignado, registra reasignación (misma semántica que reasignar_activo)."""
+    if (usuario_anterior.id if usuario_anterior else None) == (
+        usuario_nuevo.id if usuario_nuevo else None
+    ):
+        return
+    valor_anterior = str(usuario_anterior) if usuario_anterior else 'Sin asignar'
+    valor_nuevo = str(usuario_nuevo) if usuario_nuevo else 'Sin asignar'
+    HistorialMovimiento.objects.create(
+        activo=activo,
+        tipo_movimiento=HistorialMovimiento.TipoMovimiento.REASIGNACION,
+        descripcion=f"Reasignación de usuario: {valor_anterior} -> {valor_nuevo}",
+        campo_modificado='usuario_asignado',
+        valor_anterior=valor_anterior,
+        valor_nuevo=valor_nuevo,
+        usuario=usuario if usuario and usuario.is_authenticated else None,
+    )
 
 
 # ============== VISTAS ESPECIALES DE ACTIVO ==============
@@ -293,18 +349,12 @@ def reasignar_activo(request, pk):
             activo_actualizado = form.save()
             usuario_nuevo = activo_actualizado.usuario_asignado
 
-            if (usuario_anterior.id if usuario_anterior else None) != (usuario_nuevo.id if usuario_nuevo else None):
-                valor_anterior = str(usuario_anterior) if usuario_anterior else 'Sin asignar'
-                valor_nuevo = str(usuario_nuevo) if usuario_nuevo else 'Sin asignar'
-                HistorialMovimiento.objects.create(
-                    activo=activo_actualizado,
-                    tipo_movimiento=HistorialMovimiento.TipoMovimiento.REASIGNACION,
-                    descripcion=f"Reasignación de usuario: {valor_anterior} -> {valor_nuevo}",
-                    campo_modificado='usuario_asignado',
-                    valor_anterior=valor_anterior,
-                    valor_nuevo=valor_nuevo,
-                    usuario=request.user if request.user.is_authenticated else None,
-                )
+            _registrar_reasignacion_en_historial(
+                activo_actualizado,
+                usuario_anterior,
+                usuario_nuevo,
+                request.user,
+            )
 
             messages.success(request, f'Activo {activo.codigo_inventario} reasignado exitosamente.')
             return redirect('activos:activo-detail', pk=pk)
@@ -332,18 +382,12 @@ def reubicar_activo(request, pk):
             activo_actualizado = form.save()
             ubicacion_nueva = activo_actualizado.ubicacion
 
-            if (ubicacion_anterior.id if ubicacion_anterior else None) != (ubicacion_nueva.id if ubicacion_nueva else None):
-                valor_anterior = ubicacion_anterior.nombre if ubicacion_anterior else 'Sin ubicación'
-                valor_nuevo = ubicacion_nueva.nombre if ubicacion_nueva else 'Sin ubicación'
-                HistorialMovimiento.objects.create(
-                    activo=activo_actualizado,
-                    tipo_movimiento=HistorialMovimiento.TipoMovimiento.REUBICACION,
-                    descripcion=f"Reubicación: {valor_anterior} -> {valor_nuevo}",
-                    campo_modificado='ubicacion',
-                    valor_anterior=valor_anterior,
-                    valor_nuevo=valor_nuevo,
-                    usuario=request.user if request.user.is_authenticated else None,
-                )
+            _registrar_reubicacion_en_historial(
+                activo_actualizado,
+                ubicacion_anterior,
+                ubicacion_nueva,
+                request.user,
+            )
 
             messages.success(request, f'Activo {activo.codigo_inventario} reubicado exitosamente.')
             return redirect('activos:activo-detail', pk=pk)
