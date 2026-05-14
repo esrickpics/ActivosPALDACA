@@ -45,11 +45,166 @@
     }
     .table-activos tbody td {
         vertical-align: middle;
-        padding: 0.8rem 0.75rem;
+        padding: 0.85rem 0.75rem;
         border-bottom: 1px solid #edf1fb;
     }
-    .table-activos tbody tr:hover {
-        background-color: #fafbff;
+    .table-activos tbody tr.activo-table-row {
+        transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .table-activos tbody tr.activo-table-row:hover {
+        background-color: #f8f9ff;
+        box-shadow: inset 3px 0 0 var(--e-global-color-moradopaldaca, #32407b);
+    }
+    .table-activos tbody tr.activo-table-row:hover .table-actions-trigger {
+        opacity: 1;
+    }
+    /* Código inventario (enlace claramente clicable) */
+    .activo-codigo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.92rem;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.03em;
+        color: var(--e-global-color-moradopaldaca, #32407b);
+        text-decoration: none;
+        padding: 0.35rem 0.55rem 0.35rem 0.65rem;
+        margin: -0.2rem -0.35rem;
+        border-radius: 10px;
+        line-height: 1.2;
+        border: 1px solid rgba(50, 64, 123, 0.35);
+        background: linear-gradient(180deg, #ffffff 0%, #eef1fb 100%);
+        box-shadow: 0 1px 2px rgba(20, 22, 68, 0.08);
+        transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease,
+            box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .activo-codigo:hover {
+        color: var(--e-global-color-azul, #1e2560);
+        border-color: var(--e-global-color-moradopaldaca, #32407b);
+        background: linear-gradient(180deg, #f5f7ff 0%, #e4e9fb 100%);
+        box-shadow: 0 3px 10px rgba(50, 64, 123, 0.18);
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 0.2em;
+        text-decoration-color: rgba(50, 64, 123, 0.55);
+        transform: translateY(-1px);
+    }
+    .activo-codigo:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(50, 64, 123, 0.12);
+    }
+    .activo-codigo:focus-visible {
+        outline: 2px solid var(--e-global-color-moradopaldaca, #32407b);
+        outline-offset: 2px;
+    }
+    .activo-codigo__icon {
+        font-size: 0.78rem;
+        opacity: 0.72;
+        flex-shrink: 0;
+        transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .activo-codigo:hover .activo-codigo__icon {
+        opacity: 1;
+        transform: translateX(3px);
+    }
+    /* Categoría + sub */
+    .activo-cat-parent {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7aaf;
+        margin-bottom: 0.3rem;
+        max-width: 15rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .activo-badge-sub {
+        display: inline-block;
+        max-width: 100%;
+        background: #e8ecf9 !important;
+        color: #283057 !important;
+        font-weight: 600;
+        font-size: 0.72rem;
+        padding: 0.38em 0.7em;
+        border: 1px solid #d8dff2;
+    }
+    /* Marca / modelo / serial */
+    .activo-equipo-line {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: #1a2238;
+    }
+    .activo-marca {
+        font-weight: 600;
+    }
+    .activo-modelo-sep {
+        color: #b8c0d4;
+        font-weight: 400;
+        margin: 0 0.2rem;
+        user-select: none;
+    }
+    .activo-modelo {
+        color: #4a5368;
+        font-weight: 500;
+    }
+    .activo-serial {
+        margin-top: 0.35rem;
+        font-size: 0.75rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        color: #5e6785;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        max-width: 100%;
+    }
+    .activo-serial i {
+        font-size: 0.85rem;
+        opacity: 0.75;
+    }
+    /* Ubicación y usuario (pill) */
+    .activo-pill-meta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        max-width: 100%;
+        padding: 0.38rem 0.6rem;
+        background: linear-gradient(180deg, #f5f7fd 0%, #eef2fb 100%);
+        border: 1px solid #e2e8f6;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        color: #2a3148;
+        line-height: 1.25;
+    }
+    .activo-pill-meta i {
+        flex-shrink: 0;
+        color: #32407b;
+        opacity: 0.88;
+        font-size: 0.95rem;
+    }
+    .activo-pill-text {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 12.5rem;
+    }
+    .activo-pill-meta--empty {
+        background: #fafbfc;
+        border-style: dashed;
+        border-color: #dce1ea;
+        color: #8b93a8;
+        font-style: italic;
+        font-size: 0.8rem;
+    }
+    .activo-estado-pill {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.42em 0.75em;
+        letter-spacing: 0.02em;
     }
     .acciones-header {
         width: 1%;
@@ -136,8 +291,15 @@
         }
         .table-activos td {
             border: 0 !important;
-            padding: 0.35rem 0 !important;
+            padding: 0.45rem 0 !important;
             text-align: left !important;
+        }
+        .activo-pill-text {
+            max-width: 100%;
+            white-space: normal;
+        }
+        .activo-pill-meta {
+            width: 100%;
         }
         .table-activos td::before {
             content: attr(data-label);
@@ -262,43 +424,64 @@
                 </thead>
                 <tbody>
                     {% for activo in activos %}
-                    <tr>
+                    <tr class="activo-table-row">
                         <td class="selection-column" style="display: none;" data-label="Seleccionar">
                             <input type="checkbox" name="activos_seleccionados" value="{{ activo.pk }}"
                                    class="form-check-input activo-checkbox">
                         </td>
-                        <td data-label="Código">
-                            <a href="{% url 'activos:activo-detail' activo.pk %}" class="text-decoration-none">
-                                <strong>{{ activo.codigo_inventario }}</strong>
+                        <td class="activo-td-codigo" data-label="Código">
+                            <a href="{% url 'activos:activo-detail' activo.pk %}" class="activo-codigo"
+                               title="Ver ficha del activo">
+                                <span class="activo-codigo__text">{{ activo.codigo_inventario }}</span>
+                                <i class="bi bi-chevron-right activo-codigo__icon" aria-hidden="true"></i>
+                                <span class="visually-hidden">Ver detalle del activo</span>
                             </a>
                         </td>
-                        <td data-label="Categoría">
-                            <small class="text-muted">{{ activo.subcategoria.categoria.nombre }}</small><br>
-                            <span class="badge bg-secondary">{{ activo.subcategoria.nombre }}</span>
+                        <td class="activo-td-cat" data-label="Categoría">
+                            <div class="activo-cat-parent" title="{{ activo.subcategoria.categoria.nombre }}">
+                                {{ activo.subcategoria.categoria.nombre }}
+                            </div>
+                            <span class="badge activo-badge-sub rounded-pill text-truncate d-inline-block" style="max-width: 14rem;" title="{{ activo.subcategoria.nombre }}">
+                                {{ activo.subcategoria.nombre }}
+                            </span>
                         </td>
-                        <td data-label="Marca / Modelo">
-                            {{ activo.marca }} {{ activo.modelo }}
+                        <td class="activo-td-equipo" data-label="Marca / Modelo">
+                            <div class="activo-equipo-line">
+                                <span class="activo-marca">{{ activo.marca }}</span><span class="activo-modelo-sep" aria-hidden="true">·</span><span class="activo-modelo">{{ activo.modelo }}</span>
+                            </div>
                             {% if activo.numero_serial %}
-                            <br><small class="text-muted">S/N: {{ activo.numero_serial }}</small>
+                            <div class="activo-serial" title="Número de serie">
+                                <i class="bi bi-upc-scan" aria-hidden="true"></i>
+                                <span class="text-truncate d-inline-block" style="max-width: 12rem;">{{ activo.numero_serial }}</span>
+                            </div>
                             {% endif %}
                         </td>
                         <td data-label="Ubicación">
-                            <i class="bi bi-geo-alt"></i> {{ activo.ubicacion.nombre }}
+                            <span class="activo-pill-meta" title="{{ activo.ubicacion.nombre }}">
+                                <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                                <span class="activo-pill-text">{{ activo.ubicacion.nombre }}</span>
+                            </span>
                         </td>
                         <td data-label="Usuario">
                             {% if activo.usuario_asignado %}
-                            <i class="bi bi-person"></i> {{ activo.usuario_asignado }}
+                            <span class="activo-pill-meta" title="{{ activo.usuario_asignado }}">
+                                <i class="bi bi-person" aria-hidden="true"></i>
+                                <span class="activo-pill-text">{{ activo.usuario_asignado }}</span>
+                            </span>
                             {% else %}
-                            <span class="text-muted">Sin asignar</span>
+                            <span class="activo-pill-meta activo-pill-meta--empty">
+                                <i class="bi bi-person-dash" aria-hidden="true"></i>
+                                Sin asignar
+                            </span>
                             {% endif %}
                         </td>
                         <td data-label="Estado">
                             {% if activo.estado == 'AC' %}
-                            <span class="badge bg-success">Activo</span>
+                            <span class="badge rounded-pill bg-success activo-estado-pill"><i class="bi bi-check-circle me-1" aria-hidden="true"></i>Activo</span>
                             {% elif activo.estado == 'IN' %}
-                            <span class="badge bg-secondary">Inactivo</span>
+                            <span class="badge rounded-pill bg-secondary activo-estado-pill"><i class="bi bi-pause-circle me-1" aria-hidden="true"></i>Inactivo</span>
                             {% else %}
-                            <span class="badge bg-warning">En Mantenimiento</span>
+                            <span class="badge rounded-pill bg-warning text-dark activo-estado-pill"><i class="bi bi-tools me-1" aria-hidden="true"></i>En Mantenimiento</span>
                             {% endif %}
                         </td>
                         <td class="text-end" data-label="Acciones">
