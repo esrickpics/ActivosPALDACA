@@ -1,22 +1,18 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.conf import settings
 from activos.models import Activo, Categoria, Ubicacion
 from django.db.models import Count
-from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib import messages
-from django.urls import reverse_lazy
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseServerError, HttpResponseNotFound
+from django.http import HttpResponseNotFound
 import logging
+from activos.decorators import ModuloActivoRequiredMixin
 
 logger = logging.getLogger(__name__)
 
 
-class HomeView(LoginRequiredMixin, TemplateView):
+class HomeView(ModuloActivoRequiredMixin, TemplateView):
     template_name = 'home.html'
     
     def get_context_data(self, **kwargs):
@@ -39,19 +35,9 @@ class HomeView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class LoginView(DjangoLoginView):
-    template_name = 'login.html'
-    form_class = AuthenticationForm
-    redirect_authenticated_user = True
-    
-    def get_success_url(self):
-        return reverse_lazy('core:home')
-
-
-@login_required
-def signout(request):
+def logout_redirect(request):
     logout(request)
-    return redirect('core:login')
+    return redirect(settings.PALDACA_SSO_LOGIN_URL)
 
 
 # ============== VISTAS DE MANEJO DE ERRORES ==============

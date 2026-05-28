@@ -10,21 +10,28 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
-from .db import DATABASEDES, DATABASEPROD
+from dotenv import load_dotenv
+
+from .db import MYSQL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env" / "key.env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-di5^4t_*(zn&xd0i4i0ng!urql(_4e=jg830&3pe*n%zq(5730'
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-di5^4t_*(zn&xd0i4i0ng!urql(_4e=jg830&3pe*n%zq(5730",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "true").lower() == "true"
 
 ALLOWED_HOSTS = ['activos.cpaldaca.com', 'www.activos.cpaldaca.com', 'localhost', '127.0.0.1']
 
@@ -51,6 +58,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.PaldacaSessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.ErrorHandlingMiddleware',
@@ -80,15 +88,9 @@ WSGI_APPLICATION = 'SSAPI.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = DATABASEDES if DEBUG else DATABASEPROD
-# Configuración alternativa para desarrollo con SQLite (comentado)
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = MYSQL
 
+AUTH_USER_MODEL = "core.UsuarioPaldaca"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -120,9 +122,17 @@ USE_I18N = True
 
 USE_TZ = True
 
-LOGIN_URL = 'core:login'
+PALDACA_SSO_LOGIN_URL = os.getenv("PALDACA_SSO_LOGIN_URL", "http://localhost:5173/login/")
+PALDACA_STRICT_SESSION_CONSISTENCY = os.getenv(
+    "PALDACA_STRICT_SESSION_CONSISTENCY",
+    "true",
+)
+SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "paldaca_sessionid")
+SESSION_COOKIE_DOMAIN = os.getenv("SESSION_COOKIE_DOMAIN") or None
+
+LOGIN_URL = PALDACA_SSO_LOGIN_URL
 LOGIN_REDIRECT_URL = 'core:home'
-LOGOUT_REDIRECT_URL = 'core:login'
+LOGOUT_REDIRECT_URL = PALDACA_SSO_LOGIN_URL
 
 # Configuración de manejo de errores
 handler404 = 'core.views.custom_404_view'

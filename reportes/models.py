@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class ReporteGenerado(models.Model):
@@ -16,7 +16,7 @@ class ReporteGenerado(models.Model):
     )
     fecha_generacion = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Generación')
     usuario = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

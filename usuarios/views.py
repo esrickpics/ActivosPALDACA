@@ -3,15 +3,15 @@ from django.urls import reverse_lazy
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
+from activos.decorators import ModuloActivoRequiredMixin
 from .models import UsuarioAsignado
 from .forms import UsuarioForm
 
 
-class UsuarioSearchView(ListView):
+class UsuarioSearchView(ModuloActivoRequiredMixin, ListView):
     """Vista principal con buscador de usuarios"""
     model = UsuarioAsignado
     template_name = 'usuarios/usuario_search.html'
@@ -39,7 +39,7 @@ class UsuarioSearchView(ListView):
         return context
 
 
-class UsuarioProfileView(DetailView):
+class UsuarioProfileView(ModuloActivoRequiredMixin, DetailView):
     """Vista de perfil de usuario con activos asignados"""
     model = UsuarioAsignado
     template_name = 'usuarios/usuario_profile.html'
@@ -57,7 +57,7 @@ class UsuarioProfileView(DetailView):
         return context
 
 
-class UsuarioCreateView(CreateView):
+class UsuarioCreateView(ModuloActivoRequiredMixin, CreateView):
     """Vista para crear usuario"""
     model = UsuarioAsignado
     form_class = UsuarioForm
@@ -69,7 +69,7 @@ class UsuarioCreateView(CreateView):
         return super().form_valid(form)
 
 
-class UsuarioUpdateView(UpdateView):
+class UsuarioUpdateView(ModuloActivoRequiredMixin, UpdateView):
     """Vista para editar usuario"""
     model = UsuarioAsignado
     form_class = UsuarioForm
@@ -81,7 +81,7 @@ class UsuarioUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class UsuarioDeleteView(DeleteView):
+class UsuarioDeleteView(ModuloActivoRequiredMixin, DeleteView):
     """Vista para eliminar usuario"""
     model = UsuarioAsignado
     template_name = 'usuarios/usuario_confirm_delete.html'

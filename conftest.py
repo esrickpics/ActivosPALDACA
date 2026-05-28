@@ -1,17 +1,22 @@
 import pytest
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from activos.models import Categoria, SubCategoria, Ubicacion
+from core.models import Modulo, UsuarioModulo
 from usuarios.models import UsuarioAsignado
 
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(
+    user_model = get_user_model()
+    user = user_model.objects.create_user(
         username="pytest_user",
         email="pytest@example.com",
         password="test-pass-123",
     )
+    modulo, _ = Modulo.objects.get_or_create(codigo="activos", defaults={"nombre": "Activos"})
+    UsuarioModulo.objects.get_or_create(usuario=user, modulo=modulo)
+    return user
 
 
 @pytest.fixture

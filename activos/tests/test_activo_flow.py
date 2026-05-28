@@ -14,6 +14,11 @@ def _response_text(response):
     return html.unescape(response.content.decode("utf-8"))
 
 
+def _activo_from_create_redirect(response):
+    pk = int(response["Location"].rstrip("/").split("/")[-1])
+    return Activo.objects.get(pk=pk)
+
+
 @pytest.mark.django_db
 def test_vistas_activos_redirigen_si_no_hay_sesion(client, catalogo):
     urls = [
@@ -46,11 +51,11 @@ def _payload_activo(catalogo, **overrides):
 @pytest.mark.django_db
 def test_crear_activo_exitoso(client_auth, catalogo):
     url = reverse("activos:activo-create")
-    data = _payload_activo(catalogo, codigo_inventario="INV-CREAR-01")
+    data = _payload_activo(catalogo)
     r = client_auth.post(url, data)
     assert r.status_code == 302
-    assert r["Location"].endswith(reverse("activos:activo-list"))
-    act = Activo.objects.get(codigo_inventario="INV-CREAR-01")
+    act = _activo_from_create_redirect(r)
+    assert r["Location"].endswith(reverse("activos:activo-detail", args=[act.pk]))
     assert act.marca == "MarcaPy"
     assert act.ubicacion_id == catalogo["ubicacion_almacen"].pk
     assert act.usuario_asignado_id == catalogo["usuario_a"].pk
@@ -233,13 +238,10 @@ def test_flujo_integrado_crear_editar_reubicar_reasignar_historial_eliminar(
 ):
     # Crear
     create_url = reverse("activos:activo-create")
-    codigo = "INV-FLUJO-E2E"
-    r = client_auth.post(
-        create_url,
-        _payload_activo(catalogo, codigo_inventario=codigo),
-    )
+    r = client_auth.post(create_url, _payload_activo(catalogo))
     assert r.status_code == 302
-    act = Activo.objects.get(codigo_inventario=codigo)
+    act = _activo_from_create_redirect(r)
+    codigo = act.codigo_inventario
     assert act.historial_movimientos.count() == 0
 
     # Editar (ubicación y asignación ya puestas en crear; solo marca)

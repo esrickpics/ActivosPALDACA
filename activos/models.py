@@ -1,6 +1,11 @@
 from django.db import models
+from django.conf import settings
 from django.core.exceptions import ValidationError
+<<<<<<< Updated upstream
 from django.contrib.auth.models import User
+=======
+import re
+>>>>>>> Stashed changes
 
 
 class Categoria(models.Model):
@@ -145,7 +150,7 @@ class HistorialMovimiento(models.Model):
     
     # Usuario que realizó el movimiento
     usuario = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
