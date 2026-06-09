@@ -18,17 +18,23 @@ from .db import MYSQL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env" / "key.env")
+_key_env = BASE_DIR / "key.env"
+if _key_env.exists():
+    load_dotenv(_key_env)
+else:
+    load_dotenv(BASE_DIR / ".env" / "key.env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-di5^4t_*(zn&xd0i4i0ng!urql(_4e=jg830&3pe*n%zq(5730",
-)
+# Debe coincidir con Portal-Paldaca/key.env para compartir sesion SSO.
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    raise ValueError(
+        "DJANGO_SECRET_KEY no definida. Copia key.env desde Portal-Paldaca "
+        "(misma clave y MYSQL_*) a la raiz de ActivosPALDACA."
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "true").lower() == "true"
@@ -48,7 +54,7 @@ INSTALLED_APPS = [
     'activos',
     'core',
     'reportes',
-    'usuarios',
+    'usuarios',  # solo historial de migraciones; identidad en core.UsuarioPaldaca
     'mantenimientos',
 ]
 
@@ -77,6 +83,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.paldaca_urls',
             ],
         },
     },
@@ -123,6 +130,10 @@ USE_I18N = True
 USE_TZ = True
 
 PALDACA_SSO_LOGIN_URL = os.getenv("PALDACA_SSO_LOGIN_URL", "http://localhost:5173/login/")
+PALDACA_SSO_LOGOUT_URL = os.getenv(
+    "PALDACA_SSO_LOGOUT_URL",
+    "http://localhost:8000/api/auth/sso/logout/",
+)
 PALDACA_STRICT_SESSION_CONSISTENCY = os.getenv(
     "PALDACA_STRICT_SESSION_CONSISTENCY",
     "true",
@@ -130,9 +141,22 @@ PALDACA_STRICT_SESSION_CONSISTENCY = os.getenv(
 SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "paldaca_sessionid")
 SESSION_COOKIE_DOMAIN = os.getenv("SESSION_COOKIE_DOMAIN") or None
 
+# SSO local: misma cookie en localhost:8000 (portal) y :8001+ (satelites).
+if DEBUG:
+    SESSION_COOKIE_DOMAIN = None
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_DOMAIN = None
+    CSRF_COOKIE_SECURE = False
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://localhost:8001",
+        "http://localhost:8002",
+    ]
+
 LOGIN_URL = PALDACA_SSO_LOGIN_URL
 LOGIN_REDIRECT_URL = 'core:home'
-LOGOUT_REDIRECT_URL = PALDACA_SSO_LOGIN_URL
+LOGOUT_REDIRECT_URL = PALDACA_SSO_LOGOUT_URL
 
 # Configuración de manejo de errores
 handler404 = 'core.views.custom_404_view'

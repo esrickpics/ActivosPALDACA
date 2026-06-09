@@ -1,5 +1,18 @@
 from django import forms
-from .models import Categoria, SubCategoria, Ubicacion, Activo
+from django.contrib.auth import get_user_model
+
+from .models import Activo, Categoria, SubCategoria, Ubicacion
+
+
+def _usuarios_asignables_queryset():
+    return get_user_model().objects.filter(is_active=True).order_by(
+        "last_name", "first_name", "username"
+    )
+
+
+def _label_usuario(user):
+    nombre = user.get_full_name().strip()
+    return nombre or user.username
 
 
 class CategoriaForm(forms.ModelForm):
@@ -46,6 +59,14 @@ class UbicacionForm(forms.ModelForm):
 
 class ActivoForm(forms.ModelForm):
     """Formulario para Activo"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        field = self.fields["usuario_asignado"]
+        field.queryset = _usuarios_asignables_queryset()
+        field.required = False
+        field.label_from_instance = _label_usuario
+
     class Meta:
         model = Activo
         fields = [
@@ -127,6 +148,14 @@ class ActivoFilterForm(forms.Form):
 
 class ReasignarActivoForm(forms.ModelForm):
     """Formulario para reasignar activo a otro usuario"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        field = self.fields["usuario_asignado"]
+        field.queryset = _usuarios_asignables_queryset()
+        field.required = False
+        field.label_from_instance = _label_usuario
+
     class Meta:
         model = Activo
         fields = ['usuario_asignado']

@@ -1,12 +1,12 @@
 from functools import wraps
 
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 
-MODULO_CODIGO = "activos"
+from .constants import MODULO_CODIGO
 
 
 def _usuario_tiene_acceso(user):

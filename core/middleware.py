@@ -1,7 +1,9 @@
 from django.conf import settings
-from django.contrib.auth import get_user_model, logout
+from django.contrib.auth import get_user_model
 from django.http import HttpResponseServerError, JsonResponse
 from django.shortcuts import redirect
+
+from .session_logout import close_paldaca_session
 from django.template.loader import render_to_string
 from django.utils.deprecation import MiddlewareMixin
 import logging
@@ -66,14 +68,11 @@ class PaldacaSessionMiddleware:
         request.session[self.SESSION_PERFIL_KEY] = user.perfil_id
 
     def _close_session(self, request):
-        logout(request)
-        request.session.flush()
+        close_paldaca_session(request)
 
         login_url = getattr(settings, "PALDACA_SSO_LOGIN_URL", "/login/")
         accept_header = request.headers.get("Accept", "").lower()
-        is_api_request = (
-            request.path.startswith("/api/") or "application/json" in accept_header
-        )
+        is_api_request = request.path.startswith("/api/") or "application/json" in accept_header
 
         if is_api_request:
             return JsonResponse(

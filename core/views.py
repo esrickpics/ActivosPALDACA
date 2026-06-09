@@ -3,7 +3,6 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from activos.models import Activo, Categoria, Ubicacion
 from django.db.models import Count
-from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.http import HttpResponseNotFound
 import logging
@@ -36,8 +35,8 @@ class HomeView(ModuloActivoRequiredMixin, TemplateView):
 
 
 def logout_redirect(request):
-    logout(request)
-    return redirect(settings.PALDACA_SSO_LOGIN_URL)
+    """Alias local: redirige al logout SSO central del portal."""
+    return redirect(settings.PALDACA_SSO_LOGOUT_URL)
 
 
 # ============== VISTAS DE MANEJO DE ERRORES ==============
