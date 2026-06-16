@@ -94,6 +94,14 @@ class UsuarioPaldaca(AbstractUser):
         (ROL_ADMINISTRADOR, "Administrador"),
     )
 
+    telefono = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="Teléfono del usuario",
+        verbose_name="Teléfono",
+    )
+
     disciplina = models.ForeignKey(
         Disciplina,
         null=True,

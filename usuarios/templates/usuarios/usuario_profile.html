@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ usuario.nombre_completo }} - Perfil - {{ block.super }}{% endblock %}
+{% block title %}{{ usuario.get_full_name|default:usuario.username }} - Perfil - {{ block.super }}{% endblock %}
 
 {% block content %}
 <div class="px-4 py-4 usuario-profile-page">
@@ -15,9 +15,9 @@
                     </div>
                 </div>
                 <div class="col-12 col-md-8">
-                    <h2 class="mb-2">{{ usuario.nombre_completo }}</h2>
-                    <h5 class="mb-3">{{ usuario.cargo|default:"Sin cargo asignado" }}</h5>
-                    
+                    <h2 class="mb-2">{{ usuario.get_full_name|default:usuario.username }}</h2>
+                    <h5 class="mb-3">{{ usuario.perfil.nombre|default:"Sin perfil asignado" }}</h5>
+
                     <div class="row">
                         <div class="col-md-6">
                             <p class="mb-2">
@@ -29,21 +29,6 @@
                             <p class="mb-2">
                                 <i class="bi bi-telephone me-2"></i>
                                 <strong>Teléfono:</strong> {{ usuario.telefono|default:"No especificado" }}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-2">
-                                <i class="bi bi-card-text me-2"></i>
-                                <strong>Identificación:</strong> {{ usuario.identificacion }}
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-2">
-                                <i class="bi bi-building me-2"></i>
-                                <strong>Departamento:</strong> {{ usuario.departamento|default:"No especificado" }}
                             </p>
                         </div>
                     </div>

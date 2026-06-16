@@ -26,7 +26,7 @@
                                id="buscar" 
                                name="buscar" 
                                value="{{ buscar }}"
-                               placeholder="Buscar por nombre, apellido, identificación, email o cargo...">
+                               placeholder="Buscar por nombre, correo o teléfono...">
                     </div>
                 </div>
                 <div class="col-md-2">
@@ -51,18 +51,18 @@
                         </div>
                     </div>
                     <div class="col-md-8">
-                        <h5 class="mb-1">{{ usuario.nombre_completo }}</h5>
+                        <h5 class="mb-1">{{ usuario.get_full_name|default:usuario.username }}</h5>
                         <p class="mb-1 text-muted">
-                            <i class="bi bi-briefcase"></i> {{ usuario.cargo|default:"Sin cargo asignado" }}
+                            <i class="bi bi-envelope"></i> {{ usuario.email|default:"Sin correo" }}
                         </p>
                         <p class="mb-0 text-muted">
-                            <i class="bi bi-building"></i> {{ usuario.departamento|default:"Sin departamento" }}
+                            <i class="bi bi-briefcase"></i> {{ usuario.perfil.nombre|default:"Sin perfil" }}
                         </p>
                     </div>
                     <div class="col-md-3 text-end">
                         <div class="user-stats">
                             <span class="badge bg-info me-2">
-                                <i class="bi bi-box-seam"></i> {{ usuario.activos.count }} activos
+                                <i class="bi bi-box-seam"></i> {{ usuario.activos_asignados.count }} activos
                             </span>
                             <span class="badge bg-success">
                                 <i class="bi bi-check-circle"></i> Activo
