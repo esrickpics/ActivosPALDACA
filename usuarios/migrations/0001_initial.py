@@ -21,7 +21,6 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(blank=True, max_length=254, null=True)),
                 ('telefono', models.CharField(blank=True, max_length=20, null=True)),
                 ('cargo', models.CharField(blank=True, max_length=100, null=True)),
-                ('departamento', models.CharField(blank=True, max_length=100, null=True)),
                 ('activo', models.BooleanField(default=True)),
                 ('fecha_creacion', models.DateTimeField(auto_now_add=True)),
                 ('fecha_actualizacion', models.DateTimeField(auto_now=True)),

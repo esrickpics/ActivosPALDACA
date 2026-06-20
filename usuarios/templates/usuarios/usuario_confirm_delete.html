@@ -12,13 +12,13 @@
             </h4>
         </div>
         <div class="card-body">
-            <p class="lead">¿Está seguro que desea eliminar al usuario <strong>{{ object.nombre_completo }}</strong>?</p>
+            <p class="lead">¿Está seguro que desea desactivar al usuario <strong>{{ object.get_full_name|default:object.username }}</strong>?</p>
             
-            {% if object.activos.count > 0 %}
+            {% if object.activos_asignados.count > 0 %}
             <div class="alert alert-warning">
                 <i class="bi bi-exclamation-triangle"></i>
-                Este usuario tiene <strong>{{ object.activos.count }}</strong> activo(s) asignado(s).
-                No se podrá eliminar.
+                Este usuario tiene <strong>{{ object.activos_asignados.count }}</strong> activo(s) asignado(s).
+                No se podrá desactivar.
             </div>
             {% endif %}
 
@@ -26,12 +26,11 @@
                 <div class="col-md-6">
                     <h6>Información del Usuario:</h6>
                     <ul class="list-unstyled">
-                        <li><strong>Nombre:</strong> {{ object.nombre_completo }}</li>
-                        <li><strong>Identificación:</strong> {{ object.identificacion }}</li>
-                        <li><strong>Cargo:</strong> {{ object.cargo|default:"Sin cargo" }}</li>
-                        <li><strong>Departamento:</strong> {{ object.departamento|default:"Sin departamento" }}</li>
+                        <li><strong>Nombre:</strong> {{ object.get_full_name|default:object.username }}</li>
+                        <li><strong>Correo:</strong> {{ object.email|default:"Sin correo" }}</li>
+                        <li><strong>Perfil:</strong> {{ object.perfil.nombre|default:"Sin perfil" }}</li>
                         <li><strong>Estado:</strong> 
-                            {% if object.activo %}
+                            {% if object.is_active %}
                                 <span class="badge bg-success">Activo</span>
                             {% else %}
                                 <span class="badge bg-secondary">Inactivo</span>
@@ -41,12 +40,12 @@
                 </div>
                 <div class="col-md-6">
                     <h6>Activos Asignados:</h6>
-                    {% if object.activos.count > 0 %}
+                    {% if object.activos_asignados.count > 0 %}
                         <p class="text-danger">
-                            <i class="bi bi-box-seam"></i> {{ object.activos.count }} activo(s) asignado(s)
+                            <i class="bi bi-box-seam"></i> {{ object.activos_asignados.count }} activo(s) asignado(s)
                         </p>
                         <small class="text-muted">
-                            Para eliminar este usuario, primero debe reasignar o eliminar todos sus activos.
+                            Para desactivar este usuario, primero debe reasignar todos sus activos.
                         </small>
                     {% else %}
                         <p class="text-success">
@@ -62,9 +61,9 @@
                     <a href="{% url 'usuarios:usuario-search' %}" class="btn btn-secondary">
                         <i class="bi bi-x-circle"></i> Cancelar
                     </a>
-                    {% if object.activos.count == 0 %}
+                    {% if object.activos_asignados.count == 0 %}
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Eliminar
+                        <i class="bi bi-trash"></i> Desactivar
                     </button>
                     {% endif %}
                 </div>

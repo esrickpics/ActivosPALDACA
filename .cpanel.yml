@@ -7,4 +7,4 @@ deployment:
      # 🧹 Limpiar archivos antiguos del destino (sin tocar logs o tmp)
     - /usr/bin/find $DEPLOY_PATH -mindepth 1 -maxdepth 1 ! -name "logs" ! -name "tmp" -exec rm -rf {} \;
 
-    - /bin/rsync -avz --exclude='.git*' --exclude='.cpanel.yml' --exclude='tests/' --exclude='.env' $REPO_PATH/ $DEPLOY_PATH/
+    - /bin/rsync -avz --exclude='.git*' --exclude='passanger_wsgi.py' --exclude='.cpanel.yml' --exclude='tests/' --exclude='.env' $REPO_PATH/ $DEPLOY_PATH/

@@ -5,9 +5,9 @@ from django.utils import timezone
 from datetime import datetime
 from activos.models import Activo
 from .utils import generar_pdf, formatear_fecha, obtener_filtros_aplicados
-from django.contrib.auth.decorators import login_required
+from activos.decorators import requiere_modulo_paldaca
 
-@login_required
+@requiere_modulo_paldaca
 def generar_reporte_activos(request):
     """
     Genera un reporte PDF con todos los activos filtrados
@@ -69,7 +69,7 @@ def generar_reporte_activos(request):
         return redirect('activos:activo-list')
 
 
-@login_required
+@requiere_modulo_paldaca
 def generar_nota_entrega(request):
     """
     Genera una nota de entrega PDF con los activos seleccionados

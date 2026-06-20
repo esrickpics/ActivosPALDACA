@@ -1,58 +1,67 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
-from django.views.generic import (
-    ListView, DetailView, CreateView, UpdateView, DeleteView
-)
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.http import JsonResponse
-from .models import UsuarioAsignado
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+
+from activos.decorators import ModuloActivoRequiredMixin
+
 from .forms import UsuarioForm
 
+UserModel = get_user_model()
 
-class UsuarioSearchView(ListView):
-    """Vista principal con buscador de usuarios"""
-    model = UsuarioAsignado
-    template_name = 'usuarios/usuario_search.html'
-    context_object_name = 'usuarios'
+
+def _usuarios_gestion_queryset():
+    return UserModel.objects.filter(is_active=True).select_related("perfil")
+
+
+class UsuarioSearchView(ModuloActivoRequiredMixin, ListView):
+    """Buscador de usuarios asignables (core_usuario)."""
+
+    model = UserModel
+    template_name = "usuarios/usuario_search.html"
+    context_object_name = "usuarios"
     paginate_by = 10
-    
+
     def get_queryset(self):
-        queryset = super().get_queryset().filter(activo=True)
-        buscar = self.request.GET.get('buscar')
-        
+        queryset = _usuarios_gestion_queryset()
+        buscar = self.request.GET.get("buscar", "").strip()
         if buscar:
             queryset = queryset.filter(
-                Q(nombres__icontains=buscar) |
-                Q(apellidos__icontains=buscar) |
-                Q(identificacion__icontains=buscar) |
-                Q(email__icontains=buscar) |
-                Q(cargo__icontains=buscar)
+                Q(first_name__icontains=buscar)
+                | Q(last_name__icontains=buscar)
+                | Q(username__icontains=buscar)
+                | Q(email__icontains=buscar)
+                | Q(telefono__icontains=buscar)
+                | Q(perfil__nombre__icontains=buscar)
             )
-        
-        return queryset
-    
+        return queryset.order_by("last_name", "first_name", "username")
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['buscar'] = self.request.GET.get('buscar', '')
+        context["buscar"] = self.request.GET.get("buscar", "")
         return context
 
 
-class UsuarioProfileView(DetailView):
-    """Vista de perfil de usuario con activos asignados"""
-    model = UsuarioAsignado
-    template_name = 'usuarios/usuario_profile.html'
-    context_object_name = 'usuario'
-    
+class UsuarioProfileView(ModuloActivoRequiredMixin, DetailView):
+    """Perfil con activos asignados."""
+
+    model = UserModel
+    template_name = "usuarios/usuario_profile.html"
+    context_object_name = "usuario"
+
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('activos__subcategoria__categoria', 'activos__ubicacion')
-    
+        return _usuarios_gestion_queryset().prefetch_related(
+            "activos_asignados__subcategoria__categoria",
+            "activos_asignados__ubicacion",
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        usuario = self.get_object()
-        context['activos_asignados'] = usuario.activos.all().select_related(
-            'subcategoria__categoria', 'ubicacion'
+        usuario = self.object
+        context["activos_asignados"] = usuario.activos_asignados.select_related(
+            "subcategoria__categoria", "ubicacion"
         )
         return context
 
@@ -75,43 +84,50 @@ class UsuarioProfileView(DetailView):
         return redirect('usuarios:usuario-profile', pk=self.object.pk)
 
 
-class UsuarioCreateView(CreateView):
-    """Vista para crear usuario"""
-    model = UsuarioAsignado
+class UsuarioCreateView(ModuloActivoRequiredMixin, CreateView):
+    model = UserModel
     form_class = UsuarioForm
-    template_name = 'usuarios/usuario_form.html'
-    success_url = reverse_lazy('usuarios:usuario-search')
-    
+    template_name = "usuarios/usuario_form.html"
+    success_url = reverse_lazy("usuarios:usuario-search")
+
     def form_valid(self, form):
-        messages.success(self.request, 'Usuario creado exitosamente.')
+        messages.success(self.request, "Usuario creado exitosamente.")
         return super().form_valid(form)
 
 
-class UsuarioUpdateView(UpdateView):
-    """Vista para editar usuario"""
-    model = UsuarioAsignado
+class UsuarioUpdateView(ModuloActivoRequiredMixin, UpdateView):
+    model = UserModel
     form_class = UsuarioForm
-    template_name = 'usuarios/usuario_form.html'
-    success_url = reverse_lazy('usuarios:usuario-search')
-    
+    template_name = "usuarios/usuario_form.html"
+    success_url = reverse_lazy("usuarios:usuario-search")
+
+    def get_queryset(self):
+        return UserModel.objects.select_related("perfil")
+
     def form_valid(self, form):
-        messages.success(self.request, 'Usuario actualizado exitosamente.')
+        messages.success(self.request, "Usuario actualizado exitosamente.")
         return super().form_valid(form)
 
 
-class UsuarioDeleteView(DeleteView):
-    """Vista para eliminar usuario"""
-    model = UsuarioAsignado
-    template_name = 'usuarios/usuario_confirm_delete.html'
-    success_url = reverse_lazy('usuarios:usuario-search')
-    
+class UsuarioDeleteView(ModuloActivoRequiredMixin, DeleteView):
+    """Desactiva el usuario (no borra core_usuario compartido con SSO)."""
+
+    model = UserModel
+    template_name = "usuarios/usuario_confirm_delete.html"
+    success_url = reverse_lazy("usuarios:usuario-search")
+
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
-        
-        # Verificar si tiene activos asignados
-        if self.object.activos.exists():
-            messages.error(self.request, f'No se puede eliminar el usuario "{self.object.nombre_completo}" porque tiene activos asignados.')
-            return redirect('usuarios:usuario-search')
-        
-        messages.success(self.request, 'Usuario eliminado exitosamente.')
-        return super().delete(request, *args, **kwargs)
+        nombre = self.object.get_full_name().strip() or self.object.username
+
+        if self.object.activos_asignados.exists():
+            messages.error(
+                request,
+                f'No se puede desactivar al usuario "{nombre}" porque tiene activos asignados.',
+            )
+            return redirect("usuarios:usuario-search")
+
+        self.object.is_active = False
+        self.object.save(update_fields=["is_active"])
+        messages.success(request, "Usuario desactivado exitosamente.")
+        return redirect(self.success_url)

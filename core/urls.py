@@ -5,8 +5,7 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
-    path('login/', views.LoginView.as_view(), name='login'),
-    path('logout/', views.signout, name='logout'),
+    path('logout/', views.logout_redirect, name='logout'),
     
     # URLs para probar manejo de errores (solo en desarrollo)
     path('test/404/', views.test_404_view, name='test-404'),

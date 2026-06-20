@@ -1,18 +1,19 @@
 """
 Carga datos de ejemplo de activos con códigos PAL-<ABREV>-NNN
 (ej.: PAL-D-001 desktop, PAL-L-001 laptop, PAL-M-001 monitor, PAL-MO-001 mouse).
-Crea además 10 usuarios asignables (UsuarioAsignado) y reparte los activos entre ellos.
+Crea además 10 usuarios Paldaca de demo y reparte los activos entre ellos.
 
 Uso:
   python manage.py seed_activos_pal
   python manage.py seed_activos_pal --por-tipo 5 --dry-run
 """
 import re
+
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from activos.models import Activo, Categoria, SubCategoria, Ubicacion
-from usuarios.models import UsuarioAsignado
 
 NUM_USUARIOS_SEED = 10
 PREFIJO_ID_USUARIO_SEED = "PAL-SEED"
@@ -40,41 +41,40 @@ def codigo_inventario_pal(abreviatura: str, numero: int) -> str:
 
 def asegurar_usuarios_seed():
     """
-    Garantiza NUM_USUARIOS_SEED usuarios con identificación PAL-SEED-01..10.
+    Garantiza NUM_USUARIOS_SEED usuarios en core_usuario con username PAL-SEED-01..10.
     Devuelve (lista de instancias, cantidad de filas nuevas creadas).
     """
+    User = get_user_model()
     creados = 0
     usuarios = []
     for n in range(1, NUM_USUARIOS_SEED + 1):
-        ident = f"{PREFIJO_ID_USUARIO_SEED}-{n:02d}"
-        u, was_created = UsuarioAsignado.objects.get_or_create(
-            identificacion=ident,
+        username = f"{PREFIJO_ID_USUARIO_SEED}-{n:02d}"
+        u, was_created = User.objects.get_or_create(
+            username=username,
             defaults={
-                "nombres": f"Usuario demo {n}",
-                "apellidos": "PALDACA",
+                "first_name": f"Usuario demo {n}",
+                "last_name": "PALDACA",
                 "email": f"demo{n}@paldaca.seed",
-                "telefono": "",
-                "cargo": "Personal de oficina",
-                "departamento": "Operaciones",
-                "activo": True,
+                "is_active": True,
             },
         )
         if was_created:
+            u.set_unusable_password()
+            u.save(update_fields=["password"])
             creados += 1
         usuarios.append(u)
     return usuarios, creados
 
 
 def etiqueta_usuario_demo(n: int) -> str:
-    ident = f"{PREFIJO_ID_USUARIO_SEED}-{n:02d}"
-    return f"Usuario demo {n} ({ident})"
+    username = f"{PREFIJO_ID_USUARIO_SEED}-{n:02d}"
+    return f"Usuario demo {n} ({username})"
 
 
-# Plantillas: abreviatura, nombre subcategoría, marca, modelo de ejemplo
 DEFINICIONES_TIPOS = [
     {"abbr": "D", "subcategoria": "PC de escritorio (Desktop)", "marca": "HP", "modelo": "ProDesk 400 G7"},
     {"abbr": "L", "subcategoria": "Laptop", "marca": "Lenovo", "modelo": "ThinkPad E14 Gen 5"},
-    {"abbr": "M", "subcategoria": "Monitor", "marca": "Samsung", "modelo": "F24T350FHU 24\""},
+    {"abbr": "M", "subcategoria": "Monitor", "marca": "Samsung", "modelo": 'F24T350FHU 24"'},
     {"abbr": "MO", "subcategoria": "Mouse", "marca": "Logitech", "modelo": "M185"},
 ]
 
@@ -82,7 +82,7 @@ DEFINICIONES_TIPOS = [
 class Command(BaseCommand):
     help = (
         "Inserta activos de ejemplo (desktop D, laptop L, monitor M, mouse MO) "
-        "con códigos PAL-<abreviatura>-001, 002, ...; crea 10 UsuarioAsignado y "
+        "con códigos PAL-<abreviatura>-001, 002, ...; crea 10 UsuarioPaldaca y "
         "asigna cada activo en round-robin a esos usuarios."
     )
 
@@ -174,7 +174,8 @@ class Command(BaseCommand):
                         usuario_obj = usuarios_para_asignar[
                             indice_asignacion % len(usuarios_para_asignar)
                         ]
-                        asignado_a = usuario_obj.nombre_completo + f" ({usuario_obj.identificacion})"
+                        nombre = usuario_obj.get_full_name().strip() or usuario_obj.username
+                        asignado_a = f"{nombre} ({usuario_obj.username})"
                     indice_asignacion += 1
 
                     creados.append(
