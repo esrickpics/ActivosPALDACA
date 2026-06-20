@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-from .db import MYSQL
+from .db import DATABASEPROD
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'SSAPI.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = MYSQL
+DATABASES = DATABASEPROD
 
 AUTH_USER_MODEL = "core.UsuarioPaldaca"
 
