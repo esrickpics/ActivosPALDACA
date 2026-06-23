@@ -8,10 +8,6 @@ MODULOS_BASE = [
     ("codigos", "Codigos"),
     ("activos", "Activos"),
     ("hdt", "Hoja de Tiempo"),
-    ("ventas", "Ventas"),
-    ("inventario", "Inventario"),
-    ("rrhh", "Recursos Humanos"),
-    ("proyectos", "Proyectos"),
 ]
 
 

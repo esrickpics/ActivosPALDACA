@@ -97,6 +97,9 @@ WSGI_APPLICATION = 'SSAPI.wsgi.application'
 
 DATABASES = DATABASEPROD
 
+SESSION_COOKIE_DOMAIN = '.cpaldaca.com'  # El punto inicial permite leer cookies entre subdominios
+SESSION_COOKIE_NAME = 'paldaca_sso_session' # Debe ser EXACTAMENTE el mismo nombre en todas las apps
+
 AUTH_USER_MODEL = "core.UsuarioPaldaca"
 
 # Password validation

@@ -1,0 +1,50 @@
+name: Deploy to Namecheap
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs: 
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # PASO 1: Diagnóstico previo para verificar si el secreto llega vivo
+      - name: Validar si el secreto se recibe correctamente
+        run: |
+          if [ -z "$CLAVE_SECRETA" ]; then
+            echo "❌ ERROR: El secreto está vacío."
+            exit 1
+          else
+            echo "✅ GitHub está enviando algo."
+            echo "Silueta visual de tu secreto (Letras/Números cambiados por 'x'):"
+            echo "----------------------------------------------------"
+            echo "$CLAVE_SECRETA" | sed 's/[A-Za-z0-9]/x/g'
+            echo "----------------------------------------------------"
+          fi
+        env:
+          CLAVE_SECRETA: ${{ secrets.SSH_PRIVATE_KEY }}
+          
+      # PASO 2: Despliegue real (Cerrando sesión SSH en el puerto de Namecheap)
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # 1. Navegar a la carpeta del proyecto primero
+            cd /home/ssapmcco/Projects/Activos
+
+            # 2. Traer cambios del repo
+            git pull origin main
+
+            # 3. Activar el entorno virtual específico
+            source /home/ssapmcco/virtualenv/Projects/Activos/3.13/bin/activate
+
+            # 4. Instalar/actualizar dependencias
+            pip install -r requirements.txt
+
+            # 6. Reiniciar la app en cPanel (Esencial para Python)
+            touch passenger_wsgi.py
