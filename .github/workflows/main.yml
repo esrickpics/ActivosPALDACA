@@ -2,31 +2,14 @@ name: Deploy to Namecheap
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
-jobs: 
+jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # PASO 1: Diagnóstico previo para verificar si el secreto llega vivo
-      - name: Validar si el secreto se recibe correctamente
-        run: |
-          if [ -z "$CLAVE_SECRETA" ]; then
-            echo "❌ ERROR: El secreto está vacío."
-            exit 1
-          else
-            echo "✅ GitHub está enviando algo."
-            echo "Silueta visual de tu secreto (Letras/Números cambiados por 'x'):"
-            echo "----------------------------------------------------"
-            echo "$CLAVE_SECRETA" | sed 's/[A-Za-z0-9]/x/g'
-            echo "----------------------------------------------------"
-          fi
-        env:
-          CLAVE_SECRETA: ${{ secrets.SSH_PRIVATE_KEY }}
-          
-      # PASO 2: Despliegue real (Cerrando sesión SSH en el puerto de Namecheap)
-      - name: Deploy via SSH
+      - name: Deploy Activos via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -34,17 +17,46 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # 1. Navegar a la carpeta del proyecto primero
-            cd /home/ssapmcco/Projects/Activos
+            set -e
+            PROJECT_DIR=/home/ssapmcco/Projects/Activos
+            STATIC_SITE=/home/ssapmcco/activos.cpaldaca.com
+            VENV=/home/ssapmcco/virtualenv/Projects/Activos/3.13/bin/activate
 
-            # 2. Traer cambios del repo
+            cd "$PROJECT_DIR"
+
+            echo "Guardando cambios locales temporales..."
+            git stash || true
+
+            echo "Trayendo cambios desde GitHub..."
             git pull origin main
 
-            # 3. Activar el entorno virtual específico
-            source /home/ssapmcco/virtualenv/Projects/Activos/3.13/bin/activate
+            echo "Activando entorno virtual..."
+            source "$VENV"
 
-            # 4. Instalar/actualizar dependencias
-            pip install -r requirements.txt
+            if [ -f "requirements.txt" ]; then
+              echo "Instalando dependencias..."
+              pip install -r requirements.txt
+            fi
 
-            # 6. Reiniciar la app en cPanel (Esencial para Python)
-            touch passenger_wsgi.py
+            echo "Aplicando migraciones..."
+            python manage.py migrate --noinput
+
+            echo "Recopilando archivos estaticos..."
+            python manage.py collectstatic --noinput --clear
+
+            echo "Limpiando sitio estatico anterior..."
+            mkdir -p "$STATIC_SITE/static"
+            for item in "$STATIC_SITE"/* "$STATIC_SITE"/.[^.]*; do
+              [ -e "$item" ] || continue
+              base="$(basename "$item")"
+              case "$base" in
+                .htaccess|.well-known|cgi-bin) ;;
+                *) rm -rf "$item" ;;
+              esac
+            done
+
+            echo "Publicando static en activos.cpaldaca.com..."
+            rsync -av --delete "$PROJECT_DIR/staticfiles/" "$STATIC_SITE/static/"
+
+            echo "Reiniciando aplicacion Phusion Passenger..."
+            touch "$PROJECT_DIR/passenger_wsgi.py"
