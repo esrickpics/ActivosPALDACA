@@ -804,6 +804,21 @@ body.app-layout.sidebar-drawer-open .app-sidebar-backdrop {
     background-color: #eef1f6;
 }
 
+/* Paldaca nav embebido: el offset lo gestiona paldaca-nav.css */
+body.paldaca-nav-mounted.app-layout {
+    display: block;
+}
+
+body.paldaca-nav-mounted .app-content-wrap {
+    margin-left: 0;
+    width: 100%;
+}
+
+body.paldaca-nav-mounted .app-content-wrap .main-content {
+    margin-left: 0;
+    width: 100%;
+}
+
 .app-topbar {
     position: sticky;
     top: 0;
