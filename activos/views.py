@@ -445,6 +445,14 @@ class ActivoDetailView(ModuloActivoRequiredMixin, DetailView):
             )
         )
         context['ubicaciones'] = Ubicacion.objects.all()
+        from activos.models import EtiquetaQR
+
+        context['etiqueta_vigente'] = (
+            self.object.etiquetas
+            .filter(estado=EtiquetaQR.EstadoEtiqueta.VINCULADA)
+            .order_by('-fecha_vinculacion')
+            .first()
+        )
         return context
 
 
@@ -470,30 +478,44 @@ class ActivoCreateView(ActivoFormContextMixin, ModuloActivoRequiredMixin, Create
             f'Activo {self.object.codigo_inventario} creado exitosamente.',
         )
 
-        if 'guardar_y_nuevo' in self.request.POST:
-            return redirect('activos:activo-create')
+        guardar_y_nuevo = 'guardar_y_nuevo' in self.request.POST
+        generar_qr = bool(self.request.POST.get('generar_etiqueta_qr'))
+        etiqueta_pk = None
 
-        if self.request.POST.get('generar_etiqueta_qr'):
+        if generar_qr:
+            from django.core.exceptions import ValidationError
+
             from activos.services.etiquetas import crear_etiqueta_vinculada_para_activo
 
-            etiqueta, creada = crear_etiqueta_vinculada_para_activo(
-                self.object,
-                creada_por=self.request.user,
-            )
+            try:
+                etiqueta, creada = crear_etiqueta_vinculada_para_activo(
+                    self.object,
+                    creada_por=self.request.user,
+                )
+            except ValidationError as exc:
+                messages.error(self.request, "; ".join(exc.messages))
+                return redirect('activos:activo-detail', pk=self.object.pk)
+
+            etiqueta_pk = etiqueta.pk
             if creada:
                 messages.info(
                     self.request,
-                    'Etiqueta QR generada. Se abrirá el PDF para imprimirla.',
+                    'Etiqueta QR generada. El PDF se abre en otra pestaña.',
                 )
             else:
                 messages.info(
                     self.request,
-                    'Este activo ya tenía etiqueta vigente; se reimprime la misma.',
+                    'Este activo ya tenía etiqueta vigente; se reimprime en otra pestaña.',
                 )
-            destino = reverse('reportes:etiquetas-pdf')
-            return redirect(f'{destino}?ids={etiqueta.pk}')
 
-        return redirect('activos:activo-detail', pk=self.object.pk)
+        if guardar_y_nuevo:
+            destino = reverse('activos:activo-create')
+        else:
+            destino = reverse('activos:activo-detail', kwargs={'pk': self.object.pk})
+
+        if etiqueta_pk is not None:
+            destino = f'{destino}?qr_pdf={etiqueta_pk}'
+        return redirect(destino)
 
 
 class ActivoUpdateView(ActivoFormContextMixin, ModuloActivoRequiredMixin, UpdateView):

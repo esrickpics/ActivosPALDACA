@@ -33,6 +33,11 @@ urlpatterns = [
     path('<int:pk>/reasignar/', views.reasignar_activo, name='activo-reasignar'),
     path('<int:pk>/reubicar/', views.reubicar_activo, name='activo-reubicar'),
     path('<int:pk>/historial/', views.ActivoHistorialView.as_view(), name='activo-historial'),
+    path(
+        '<int:pk>/generar-etiqueta/',
+        views_etiquetas.generar_etiqueta_activo,
+        name='activo-generar-etiqueta',
+    ),
 
     # Acciones en lote (reasignar / reubicar varios activos a la vez)
     path('acciones-masivas/', views.acciones_masivas, name='activo-acciones-masivas'),
@@ -47,6 +52,7 @@ urlpatterns = [
     path('etiquetas/generar/', views_etiquetas.generar_etiquetas, name='etiqueta-generar'),
     path('etiquetas/<int:pk>/anular/', views_etiquetas.etiqueta_anular, name='etiqueta-anular'),
     path('etiquetas/<int:pk>/desvincular/', views_etiquetas.etiqueta_desvincular, name='etiqueta-desvincular'),
+    path('etiquetas/<int:pk>/eliminar/', views_etiquetas.etiqueta_eliminar, name='etiqueta-eliminar'),
 
     # Alta express de catálogo desde el formulario de activos (JSON)
     path('catalogo/<slug:tipo>/rapido/', views.crear_rapido, name='crear-rapido'),

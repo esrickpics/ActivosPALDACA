@@ -16,7 +16,7 @@ from django.views.generic import ListView
 
 from .decorators import ModuloActivoRequiredMixin, requiere_modulo_paldaca
 from .forms import AltaDesdeEtiquetaForm, EtiquetaFilterForm, GenerarEtiquetasForm
-from .models import Categoria, EtiquetaQR, HistorialMovimiento, SubCategoria
+from .models import Activo, Categoria, EtiquetaQR, HistorialMovimiento, SubCategoria
 from .services.codigos import reservar_codigos
 
 _ESTADO_ETIQUETA_LABELS = dict(EtiquetaQR.EstadoEtiqueta.choices)
@@ -316,3 +316,64 @@ def etiqueta_desvincular(request, pk):
         f"Etiqueta {etiqueta.codigo_reservado} liberada; vuelve a estar pendiente.",
     )
     return redirect("activos:etiqueta-list")
+
+
+@require_POST
+@requiere_modulo_paldaca
+def etiqueta_eliminar(request, pk):
+    """Elimina un QR de lote que nunca recibió datos de activo."""
+    from activos.services.etiquetas import eliminar_etiqueta_sin_datos
+    from django.core.exceptions import ValidationError
+
+    etiqueta = get_object_or_404(EtiquetaQR, pk=pk)
+    try:
+        codigo = eliminar_etiqueta_sin_datos(etiqueta)
+    except ValidationError as exc:
+        messages.error(request, "; ".join(exc.messages))
+        return redirect("activos:etiqueta-list")
+
+    messages.success(
+        request,
+        f"Etiqueta {codigo} eliminada. El código quedó libre para reutilizarse.",
+    )
+    return redirect("activos:etiqueta-list")
+
+
+@require_POST
+@requiere_modulo_paldaca
+def generar_etiqueta_activo(request, pk):
+    """Genera (o reimprime) la etiqueta QR de un activo creado manualmente."""
+    from django.core.exceptions import ValidationError
+
+    from activos.services.etiquetas import crear_etiqueta_vinculada_para_activo
+
+    activo = get_object_or_404(Activo, pk=pk)
+    try:
+        etiqueta, creada = crear_etiqueta_vinculada_para_activo(
+            activo,
+            creada_por=request.user,
+        )
+    except ValidationError as exc:
+        messages.error(request, "; ".join(exc.messages))
+        return redirect("activos:activo-detail", pk=activo.pk)
+
+    if creada:
+        HistorialMovimiento.objects.create(
+            activo=activo,
+            tipo_movimiento=HistorialMovimiento.TipoMovimiento.ACTUALIZACION,
+            descripcion=f"Etiqueta QR {etiqueta.codigo_reservado} generada para este activo.",
+            usuario=request.user,
+        )
+        messages.info(
+            request,
+            "Etiqueta QR generada. El PDF se abre en otra pestaña.",
+        )
+    else:
+        messages.info(
+            request,
+            "Este activo ya tenía etiqueta vigente; se reimprime en otra pestaña.",
+        )
+
+    destino = reverse("activos:activo-detail", kwargs={"pk": activo.pk})
+    return redirect(f"{destino}?qr_pdf={etiqueta.pk}")
+

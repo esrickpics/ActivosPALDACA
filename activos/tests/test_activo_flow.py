@@ -49,20 +49,37 @@ def _payload_activo(catalogo, **overrides):
 
 
 @pytest.mark.django_db
-def test_crear_activo_con_generar_qr_redirige_a_pdf(client_auth, catalogo):
+def test_crear_activo_con_generar_qr_redirige_a_ficha_con_pdf(client_auth, catalogo):
     url = reverse("activos:activo-create")
     data = _payload_activo(catalogo)
     data["generar_etiqueta_qr"] = "1"
     r = client_auth.post(url, data)
     assert r.status_code == 302
-    assert reverse("reportes:etiquetas-pdf") in r["Location"]
     act = Activo.objects.get(marca="MarcaPy", modelo="ModeloPy")
     from activos.models import EtiquetaQR
 
     etiqueta = EtiquetaQR.objects.get(activo=act)
     assert etiqueta.estado == EtiquetaQR.EstadoEtiqueta.VINCULADA
     assert etiqueta.codigo_reservado == act.codigo_inventario
-    assert f"ids={etiqueta.pk}" in r["Location"]
+    assert reverse("activos:activo-detail", args=[act.pk]) in r["Location"]
+    assert f"qr_pdf={etiqueta.pk}" in r["Location"]
+    assert reverse("reportes:etiquetas-pdf") not in r["Location"]
+
+
+@pytest.mark.django_db
+def test_guardar_y_nuevo_con_qr_vuelve_al_alta_vacia(client_auth, catalogo):
+    url = reverse("activos:activo-create")
+    data = _payload_activo(catalogo, marca="Otro", modelo="Lote")
+    data["generar_etiqueta_qr"] = "1"
+    data["guardar_y_nuevo"] = "1"
+    r = client_auth.post(url, data)
+    assert r.status_code == 302
+    act = Activo.objects.get(marca="Otro", modelo="Lote")
+    from activos.models import EtiquetaQR
+
+    etiqueta = EtiquetaQR.objects.get(activo=act)
+    assert reverse("activos:activo-create") in r["Location"]
+    assert f"qr_pdf={etiqueta.pk}" in r["Location"]
 
 
 @pytest.mark.django_db

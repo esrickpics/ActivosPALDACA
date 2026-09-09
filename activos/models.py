@@ -362,6 +362,13 @@ class EtiquetaQR(models.Model):
     def esta_vinculada(self):
         return self.estado == self.EstadoEtiqueta.VINCULADA and self.activo_id is not None
 
+    @property
+    def puede_eliminarse(self):
+        """Pendiente sin datos, o anulada: borrar libera el código."""
+        if self.estado == self.EstadoEtiqueta.ANULADA:
+            return True
+        return self.estado == self.EstadoEtiqueta.PENDIENTE and self.activo_id is None
+
     def vincular(self, activo):
         """Ata la etiqueta a un activo. Idempotente.
 

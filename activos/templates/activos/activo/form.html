@@ -10,7 +10,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="ax-page ax-page--form">
+<div class="ax-page ax-page--form"
+     {% if request.GET.qr_pdf %}
+     data-ax-qr-pdf="{% url 'reportes:etiquetas-pdf' %}?ids={{ request.GET.qr_pdf|urlencode }}"
+     {% endif %}>
 
     <nav class="ax-crumbs" aria-label="Ruta de navegación">
         <a href="{% url 'activos:activo-list' %}"><i class="bi bi-boxes"></i> Activos</a>
@@ -43,8 +46,6 @@
         </p>
     </header>
 
-    {# Sin JavaScript no hay pasos: se muestra el formulario completo de una vez.
-       El stepper es una capa de comodidad, nunca un requisito para guardar. #}
     <noscript>
         <style>
             [data-ax-panel][hidden],
@@ -54,9 +55,6 @@
         </style>
     </noscript>
 
-    {# ===================================================================== #}
-    {#  INDICADOR DE PASOS                                                   #}
-    {# ===================================================================== #}
     <nav class="ax-stepper" data-ax-stepper aria-label="Progreso del formulario">
         <button type="button" class="ax-step is-active">
             <span class="ax-step-num">1</span> Equipo
@@ -73,7 +71,7 @@
         {% endif %}
     </nav>
 
-    <form method="post" id="axFormActivo" class="ax-form" novalidate>
+    <form method="post" id="axFormActivo" class="ax-form" novalidate autocomplete="off">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -83,17 +81,12 @@
         </div>
         {% endif %}
 
-        {# ================================================================= #}
-        {#  PASO 1 · IDENTIFICACIÓN DEL EQUIPO                               #}
-        {# ================================================================= #}
         <section class="ax-panel" data-ax-panel aria-label="Paso 1: datos del equipo">
             <div class="ax-fieldset">
                 <h2 class="ax-fieldset-legend">
                     <span class="num">1</span> ¿Qué equipo es?
                 </h2>
 
-                {# El código de inventario es el identificador: se muestra siempre,
-                   pero nunca se escribe a mano — lo genera el sistema. #}
                 <div class="ax-callout mb-3">
                     <i class="bi bi-upc-scan"></i>
                     <div>
@@ -174,9 +167,6 @@
             </div>
         </section>
 
-        {# ================================================================= #}
-        {#  PASO 2 · UBICACIÓN, RESPONSABLE Y ESTADO                         #}
-        {# ================================================================= #}
         <section class="ax-panel" data-ax-panel aria-label="Paso 2: asignación" hidden>
             <div class="ax-fieldset">
                 <h2 class="ax-fieldset-legend">
@@ -251,9 +241,6 @@
         </section>
 
         {% if not object %}
-        {# ================================================================= #}
-        {#  PASO 3 · ETIQUETA QR (solo alta manual)                           #}
-        {# ================================================================= #}
         <section class="ax-panel" data-ax-panel aria-label="Paso 3: etiqueta QR" hidden>
             <div class="ax-fieldset">
                 <h2 class="ax-fieldset-legend">
@@ -265,7 +252,8 @@
                     <div>
                         <strong>Último paso del alta manual</strong><br>
                         Al confirmar, el sistema crea el código de inventario y genera la
-                        etiqueta QR con ese mismo código para imprimirla y pegarla en el equipo.
+                        etiqueta QR con ese mismo código. El PDF se abre en otra pestaña
+                        para que puedas seguir registrando equipos aquí.
                     </div>
                 </div>
 
@@ -275,7 +263,7 @@
                                id="id_generar_etiqueta_qr" value="1" checked
                                data-ax-toggle-qr-submit>
                         <label class="form-check-label" for="id_generar_etiqueta_qr">
-                            Generar etiqueta QR al guardar e ir al PDF de impresión
+                            Generar etiqueta QR al guardar (PDF en otra pestaña)
                         </label>
                     </div>
                     <small class="ax-hint">
@@ -287,9 +275,6 @@
         </section>
         {% endif %}
 
-        {# ================================================================= #}
-        {#  BARRA DE ACCIONES                                                #}
-        {# ================================================================= #}
         <div class="ax-formbar">
             <span class="ax-formbar-info">
                 <i class="bi bi-shield-check"></i>
