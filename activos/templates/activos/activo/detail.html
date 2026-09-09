@@ -10,7 +10,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="ax-page">
+<div class="ax-page"
+     {% if request.GET.qr_pdf %}
+     data-ax-qr-pdf="{% url 'reportes:etiquetas-pdf' %}?ids={{ request.GET.qr_pdf|urlencode }}"
+     {% endif %}>
 
     <nav class="ax-crumbs" aria-label="Ruta de navegación">
         <a href="{% url 'activos:activo-list' %}"><i class="bi bi-boxes"></i> Activos</a>
@@ -305,6 +308,45 @@
                            data-ubicacion-nombre="{{ activo.ubicacion.nombre }}">
                             <i class="bi bi-geo"></i> Reubicar
                         </a>
+                    </div>
+                </section>
+
+                {# Etiqueta QR — alta manual sin QR, o reimpresión #}
+                <section class="ax-card">
+                    <div class="ax-card-head">
+                        <h2 class="ax-card-title"><i class="bi bi-qr-code"></i> Etiqueta QR</h2>
+                    </div>
+                    <div class="ax-card-body ax-form">
+                        {% if etiqueta_vigente %}
+                        <p class="ax-hint mt-0 mb-3">
+                            Etiqueta vigente
+                            <strong class="ax-mono">{{ etiqueta_vigente.codigo_reservado }}</strong>.
+                            Puedes reimprimirla o gestionarla desde el parque de etiquetas.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a class="btn-pastel btn-pastel--cielo btn-pastel--sm"
+                               href="{% url 'reportes:etiquetas-pdf' %}?ids={{ etiqueta_vigente.pk }}"
+                               target="_blank" rel="noopener">
+                                <i class="bi bi-printer"></i> Reimprimir PDF
+                            </a>
+                            <a class="btn-pastel btn-pastel--neutro btn-pastel--sm"
+                               href="{% url 'activos:etiqueta-list' %}?q={{ etiqueta_vigente.codigo_reservado|urlencode }}">
+                                <i class="bi bi-collection"></i> Ver en etiquetas
+                            </a>
+                        </div>
+                        {% else %}
+                        <p class="ax-hint mt-0 mb-3">
+                            Este activo se registró sin etiqueta QR. Genera una ahora
+                            con el mismo código de inventario para imprimirla y pegarla
+                            en el equipo.
+                        </p>
+                        <form method="post" action="{% url 'activos:activo-generar-etiqueta' activo.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-pastel btn-pastel--menta btn-pastel--block">
+                                <i class="bi bi-qr-code-scan"></i> Generar etiqueta QR
+                            </button>
+                        </form>
+                        {% endif %}
                     </div>
                 </section>
 

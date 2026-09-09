@@ -611,6 +611,12 @@
         }
 
         initQrSubmitToggle(form);
+
+        form.addEventListener('submit', function () {
+            $$('[type="submit"]', form).forEach(function (b) {
+                b.disabled = true;
+            });
+        });
     }
 
     function initQrSubmitToggle(form) {
@@ -630,6 +636,27 @@
 
         toggle.addEventListener('change', actualizar);
         actualizar();
+    }
+
+    function initQrPdfPopup() {
+        var host = $('[data-ax-qr-pdf]');
+        if (!host) return;
+        var url = (host.getAttribute('data-ax-qr-pdf') || '').trim();
+        if (!url) return;
+
+        window.open(url, '_blank', 'noopener');
+
+        try {
+            var limpia = new URL(window.location.href);
+            limpia.searchParams.delete('qr_pdf');
+            var qs = limpia.searchParams.toString();
+            history.replaceState(
+                null,
+                '',
+                limpia.pathname + (qs ? '?' + qs : '') + limpia.hash
+            );
+        } catch (e) { /* ignore */ }
+        host.removeAttribute('data-ax-qr-pdf');
     }
 
     /* -------------------------------------------------------------------------
@@ -853,9 +880,10 @@
     }
 
     /* -------------------------------------------------------------------------
-       10. Dropdowns en tablas: portal al body para escapar overflow-x
-       `overflow-x: auto` en .ax-table-wrap recorta menús aunque Popper use
-       `strategy: fixed`. Tras abrir, movemos el .dropdown-menu a document.body.
+       10. Dropdowns en tablas/cards: portal al body para escapar overflow
+       `overflow-x: auto` en .ax-table-wrap y el apilado de .ax-etiqueta-card
+       recortan o tapan menús aunque Popper use `strategy: fixed`. Tras abrir,
+       movemos el .dropdown-menu a document.body.
        ---------------------------------------------------------------------- */
     var axPortaledToggle = null;
 
@@ -877,8 +905,15 @@
             bootstrap.Dropdown.getOrCreateInstance(el, { popperConfig: popperFixed });
         });
 
-        function portalTableMenu(toggle) {
-            if (!toggle.closest(".ax-table-wrap")) return;
+        function needsPortal(toggle) {
+            return !!(
+                toggle.closest(".ax-table-wrap") ||
+                toggle.closest(".ax-etiqueta-card")
+            );
+        }
+
+        function portalClippedMenu(toggle) {
+            if (!needsPortal(toggle)) return;
 
             var dropdown = toggle.closest(".dropdown");
             if (!dropdown) return;
@@ -905,7 +940,7 @@
             repositionPortaledMenu(toggle);
         }
 
-        function restoreTableMenu(toggle) {
+        function restorePortaledMenu(toggle) {
             var portal = toggle._axDropdownPortal;
             if (!portal) return;
 
@@ -951,12 +986,15 @@
 
             var row = toggle.closest(".ax-table tbody tr");
             if (row) row.classList.add("is-row-menu-open");
+
+            var card = toggle.closest(".ax-etiqueta-card");
+            if (card) card.classList.add("is-menu-open");
         });
 
         document.addEventListener("shown.bs.dropdown", function (event) {
             var toggle = event.target;
             if (!toggle.matches || !toggle.matches('[data-bs-toggle="dropdown"]')) return;
-            portalTableMenu(toggle);
+            portalClippedMenu(toggle);
         });
 
         document.addEventListener("hide.bs.dropdown", function (event) {
@@ -965,13 +1003,16 @@
 
             var row = toggle.closest(".ax-table tbody tr");
             if (row) row.classList.remove("is-row-menu-open");
+
+            var card = toggle.closest(".ax-etiqueta-card");
+            if (card) card.classList.remove("is-menu-open");
         });
 
         document.addEventListener("hidden.bs.dropdown", function (event) {
             var toggle = event.target;
             if (!toggle.matches || !toggle.matches('[data-bs-toggle="dropdown"]')) return;
 
-            restoreTableMenu(toggle);
+            restorePortaledMenu(toggle);
         });
 
         document.addEventListener("scroll", function () {
@@ -1011,5 +1052,6 @@
         initEliminar();
         initCrearRapido();
         initDropdowns();
+        initQrPdfPopup();
     });
 })();

@@ -298,6 +298,17 @@
                             </form>
                         </li>
                         {% endif %}
+                        {% if etiqueta.puede_eliminarse %}
+                        <li>
+                            <form method="post" action="{% url 'activos:etiqueta-eliminar' etiqueta.pk %}"
+                                  onsubmit="return confirm('¿Eliminar {{ etiqueta.codigo_reservado }}? El código quedará libre para reutilizarse.');">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-trash me-2"></i>Eliminar (liberar código)
+                                </button>
+                            </form>
+                        </li>
+                        {% endif %}
                         <li>
                             <form method="post" action="{% url 'activos:etiqueta-anular' etiqueta.pk %}">
                                 {% csrf_token %}
@@ -308,6 +319,16 @@
                         </li>
                     </ul>
                 </div>
+                {% elif etiqueta.puede_eliminarse %}
+                <form method="post" action="{% url 'activos:etiqueta-eliminar' etiqueta.pk %}"
+                      onsubmit="return confirm('¿Eliminar {{ etiqueta.codigo_reservado }}? El código quedará libre para reutilizarse.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-pastel btn-pastel--rosa btn-pastel--sm"
+                            title="Eliminar y liberar el código">
+                        <i class="bi bi-trash"></i>
+                        <span>Eliminar</span>
+                    </button>
+                </form>
                 {% endif %}
             </div>
         </article>

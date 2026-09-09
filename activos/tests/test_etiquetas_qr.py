@@ -855,3 +855,98 @@ def test_el_listado_de_etiquetas_carga_css_con_version(client_auth, etiqueta):
     cuerpo = _texto(client_auth.get(reverse("activos:etiqueta-list")))
     assert "activos-ui.css?v=" in cuerpo
     assert "activos-ui.js?v=" in cuerpo
+
+
+# =============================================================================
+# Generar QR desde activo manual / eliminar QR sin datos
+# =============================================================================
+
+@pytest.mark.django_db
+def test_generar_etiqueta_desde_ficha_de_activo_sin_qr(client_auth, catalogo, user):
+    activo = Activo.objects.create(
+        subcategoria=catalogo["subcategoria"],
+        marca="SinQR",
+        modelo="Manual",
+        ubicacion=catalogo["ubicacion_almacen"],
+    )
+    assert not EtiquetaQR.objects.filter(activo=activo).exists()
+
+    r = client_auth.post(reverse("activos:activo-generar-etiqueta", args=[activo.pk]))
+    assert r.status_code == 302
+    assert reverse("activos:activo-detail", args=[activo.pk]) in r["Location"]
+
+    etiqueta = EtiquetaQR.objects.get(activo=activo)
+    assert etiqueta.estado == EtiquetaQR.EstadoEtiqueta.VINCULADA
+    assert etiqueta.codigo_reservado == activo.codigo_inventario
+    assert f"qr_pdf={etiqueta.pk}" in r["Location"]
+    assert HistorialMovimiento.objects.filter(
+        activo=activo,
+        descripcion__icontains="generada",
+    ).exists()
+
+
+@pytest.mark.django_db
+def test_ficha_ofrece_generar_qr_si_no_hay_etiqueta(client_auth, catalogo):
+    activo = Activo.objects.create(
+        subcategoria=catalogo["subcategoria"],
+        marca="Ficha",
+        modelo="SinEtiqueta",
+        ubicacion=catalogo["ubicacion_almacen"],
+    )
+    cuerpo = _texto(client_auth.get(reverse("activos:activo-detail", args=[activo.pk])))
+    assert reverse("activos:activo-generar-etiqueta", args=[activo.pk]) in cuerpo
+    assert "Generar etiqueta QR" in cuerpo
+
+
+@pytest.mark.django_db
+def test_eliminar_etiqueta_pendiente_sin_datos_libera_codigo(client_auth, etiqueta):
+    codigo = etiqueta.codigo_reservado
+    assert etiqueta.puede_eliminarse
+
+    r = client_auth.post(reverse("activos:etiqueta-eliminar", args=[etiqueta.pk]))
+    assert r.status_code == 302
+    assert not EtiquetaQR.objects.filter(pk=etiqueta.pk).exists()
+    assert not EtiquetaQR.objects.filter(codigo_reservado=codigo).exists()
+
+
+@pytest.mark.django_db
+def test_eliminar_etiqueta_anulada_libera_codigo(client_auth, etiqueta):
+    codigo = etiqueta.codigo_reservado
+    etiqueta.anular()
+    assert etiqueta.puede_eliminarse
+
+    r = client_auth.post(reverse("activos:etiqueta-eliminar", args=[etiqueta.pk]))
+    assert r.status_code == 302
+    assert not EtiquetaQR.objects.filter(codigo_reservado=codigo).exists()
+
+
+@pytest.mark.django_db
+def test_listado_anulada_ofrece_eliminar(client_auth, etiqueta):
+    etiqueta.anular()
+    cuerpo = _texto(client_auth.get(reverse("activos:etiqueta-list"), {"estado": "AN"}))
+    assert reverse("activos:etiqueta-eliminar", args=[etiqueta.pk]) in cuerpo
+
+
+@pytest.mark.django_db
+def test_eliminar_etiqueta_vinculada_no_esta_permitido(
+    client_auth, etiqueta, catalogo, subcategoria
+):
+    activo = Activo.objects.create(
+        subcategoria=subcategoria,
+        marca="M",
+        modelo="X",
+        ubicacion=catalogo["ubicacion_almacen"],
+    )
+    etiqueta.vincular(activo)
+    assert not etiqueta.puede_eliminarse
+
+    r = client_auth.post(reverse("activos:etiqueta-eliminar", args=[etiqueta.pk]))
+    assert r.status_code == 302
+    assert EtiquetaQR.objects.filter(pk=etiqueta.pk).exists()
+
+
+@pytest.mark.django_db
+def test_listado_pendiente_ofrece_eliminar_sin_datos(client_auth, etiqueta):
+    cuerpo = _texto(client_auth.get(reverse("activos:etiqueta-list")))
+    assert reverse("activos:etiqueta-eliminar", args=[etiqueta.pk]) in cuerpo
+    assert "Eliminar (liberar código)" in cuerpo

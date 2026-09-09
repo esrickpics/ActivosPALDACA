@@ -2248,6 +2248,13 @@ tr:hover .ax-avatar { transform: scale(1.1); }
     animation: ax-rise .42s var(--ax-ease-out) both;
     animation-delay: calc(var(--i, 0) * 24ms);
     transition: border-color var(--ax-fast) var(--ax-ease), box-shadow var(--ax-fast) var(--ax-ease), transform var(--ax-fast) var(--ax-ease);
+    overflow: visible;
+    z-index: 0;
+}
+
+.ax-etiqueta-card.is-menu-open,
+.ax-etiqueta-card:has(.dropdown.show) {
+    z-index: 6;
 }
 
 .ax-etiqueta-page.is-sel-mode .ax-etiqueta-card.is-selectable {
