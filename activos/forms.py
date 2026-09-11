@@ -330,7 +330,9 @@ class AltaDesdeEtiquetaForm(forms.ModelForm):
                 "autocapitalize": "characters",
             }),
             "ubicacion": forms.Select(attrs={"class": "form-select"}),
-            "usuario_asignado": forms.Select(attrs={"class": "form-select"}),
+            "usuario_asignado": forms.Select(attrs={
+                "class": "form-select ax-combo-native",
+            }),
             "observaciones": forms.Textarea(attrs={
                 "class": "form-control",
                 "rows": 2,

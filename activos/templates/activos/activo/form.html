@@ -211,9 +211,10 @@
                     <label class="form-label" for="{{ form.usuario_asignado.id_for_label }}">
                         Responsable
                     </label>
-                    <div class="ax-combo"
-                         data-combo-placeholder="Escribe un nombre o apellido…"
-                         data-combo-empty-label="Sin asignar · queda disponible">
+                    <div class="ax-combo ax-combo--persona"
+                         data-combo-placeholder="Buscar por nombre o apellido…"
+                         data-combo-empty-label="Sin asignar · queda disponible"
+                         data-combo-remote-url="{% url 'activos:usuarios-asignables' %}">
                         {{ form.usuario_asignado }}
                     </div>
                     {% if form.usuario_asignado.errors %}

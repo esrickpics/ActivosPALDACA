@@ -1,7 +1,7 @@
 from functools import wraps
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
@@ -23,19 +23,38 @@ def _usuario_tiene_acceso(request):
     )
 
 
+def redirect_to_sso_login(request):
+    """Manda al login del Portal conservando la URL actual en ?next=.
+
+    Sin eso, tras autenticarse el usuario cae en el home del Portal y pierde
+    el flujo (p. ej. /q/<token>/alta/ desde el móvil).
+    """
+    login_url = settings.PALDACA_SSO_LOGIN_URL
+    next_url = request.build_absolute_uri()
+    parts = urlsplit(login_url)
+    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+    query["next"] = next_url
+    return redirect(
+        urlunsplit(
+            (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
+        )
+    )
+
+
 def _deny_unauthenticated(request):
     # Dentro del iframe un redirect al login del Portal anida el shell
     # (LoginPage hace frame-bust → deep link → otra vez iframe) y se percibe
     # como bucle al abrir fichas. El protocolo deja que el shell revalide.
     if is_embedded(request):
         return embed_signal_response(request, "session-expired")
-    return redirect(settings.PALDACA_SSO_LOGIN_URL)
+    return redirect_to_sso_login(request)
 
 
 def requiere_modulo_paldaca(view_func):
     @wraps(view_func)
-    @login_required
     def _wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return _deny_unauthenticated(request)
         if _usuario_tiene_acceso(request):
             return view_func(request, *args, **kwargs)
         return HttpResponseForbidden("No tienes acceso a este programa.")
